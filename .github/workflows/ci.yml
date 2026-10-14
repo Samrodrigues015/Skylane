@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore Bilheteira.slnx
+
+      - name: Build
+        run: dotnet build Bilheteira.slnx --no-restore --configuration Release
+
+      # Os testes de integração usam Testcontainers: o runner do GitHub já tem Docker.
+      - name: Test
+        run: dotnet test Bilheteira.slnx --no-build --configuration Release --logger "console;verbosity=normal"
