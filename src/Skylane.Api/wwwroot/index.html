@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skylane</title>
+  <meta name="description" content="Demonstração de uma bilheteira online: reserva de lugares, confirmação e validação de bilhetes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap masthead__inner">
+      <h1 class="brand">Skylane</h1>
+      <nav class="masthead__links" aria-label="Ligações do projeto">
+        <a href="/scalar">Documentação da API</a>
+        <a href="https://github.com/Samrodrigues015/Skylane">Código</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="events" aria-labelledby="events-title">
+      <h2 id="events-title" class="section-title">Próximos eventos</h2>
+      <p class="section-lead">
+        Ao reservar, os lugares ficam guardados para ti durante 10 minutos.
+        Se não confirmares a compra a tempo, voltam a ficar disponíveis.
+      </p>
+      <ol id="event-list" class="event-list" aria-live="polite"></ol>
+      <p id="events-empty" class="empty" hidden>Ainda não há eventos. Cria um através da documentação da API.</p>
+    </section>
+
+    <aside class="side">
+      <section class="panel" aria-labelledby="basket-title">
+        <h2 id="basket-title" class="panel__title">A tua reserva</h2>
+        <div id="basket" aria-live="polite">
+          <p class="empty">Escolhe um evento e quantos bilhetes queres.</p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="gate-title">
+        <h2 id="gate-title" class="panel__title">Validar à entrada</h2>
+        <form id="checkin-form" class="checkin" autocomplete="off">
+          <label for="checkin-code">Código do bilhete</label>
+          <div class="checkin__row">
+            <input id="checkin-code" name="code" placeholder="ABCDE-23456" required maxlength="11" spellcheck="false">
+            <button type="submit" class="btn btn--quiet">Validar</button>
+          </div>
+          <p id="checkin-result" class="checkin__result" aria-live="polite"></p>
+        </form>
+      </section>
+    </aside>
+  </main>
+
+  <template id="event-template">
+    <li class="event">
+      <time class="event__date">
+        <span class="event__day"></span>
+        <span class="event__month"></span>
+      </time>
+      <div class="event__body">
+        <h3 class="event__name"></h3>
+        <p class="event__meta"></p>
+        <div class="seats">
+          <div class="seats__bar"><span class="seats__fill"></span></div>
+          <p class="seats__label"></p>
+        </div>
+      </div>
+      <form class="event__buy">
+        <label class="visually-hidden">Número de bilhetes</label>
+        <select name="quantity"></select>
+        <button type="submit" class="btn">Reservar</button>
+      </form>
+    </li>
+  </template>
+
+  <footer class="wrap footer">
+    <p>Projeto de demonstração em ASP.NET Core e SQL Server, por Samara Rodrigues.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

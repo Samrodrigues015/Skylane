@@ -4,11 +4,11 @@ WORKDIR /src
 
 # Copiar só o .csproj primeiro aproveita a cache do Docker:
 # o restore só volta a correr quando as dependências mudam.
-COPY src/Bilheteira.Api/Bilheteira.Api.csproj src/Bilheteira.Api/
-RUN dotnet restore src/Bilheteira.Api/Bilheteira.Api.csproj
+COPY src/Skylane.Api/Skylane.Api.csproj src/Skylane.Api/
+RUN dotnet restore src/Skylane.Api/Skylane.Api.csproj
 
 COPY src/ src/
-RUN dotnet publish src/Bilheteira.Api/Bilheteira.Api.csproj -c Release -o /app --no-restore
+RUN dotnet publish src/Skylane.Api/Skylane.Api.csproj -c Release -o /app --no-restore
 
 # Fase 2: imagem final, só com o runtime (bem mais pequena que a do SDK)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
@@ -19,4 +19,4 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 USER app
 
-ENTRYPOINT ["dotnet", "Bilheteira.Api.dll"]
+ENTRYPOINT ["dotnet", "Skylane.Api.dll"]

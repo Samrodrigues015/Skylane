@@ -1,6 +1,6 @@
-# Bilheteira
+# Skylane
 
-[![CI](https://github.com/Samrodrigues015/bilheteira/actions/workflows/ci.yml/badge.svg)](https://github.com/Samrodrigues015/bilheteira/actions/workflows/ci.yml)
+[![CI](https://github.com/Samrodrigues015/Skylane/actions/workflows/ci.yml/badge.svg)](https://github.com/Samrodrigues015/Skylane/actions/workflows/ci.yml)
 
 API de venda de bilhetes para **eventos** e **voos** em ASP.NET Core e SQL Server, com uma página de demonstração.
 O foco do projeto é um problema concreto: **não vender mais bilhetes do que existem, mesmo quando centenas de pessoas compram ao mesmo tempo.**
@@ -138,7 +138,7 @@ Abre http://localhost:8080 para a página de demonstração e http://localhost:8
 
 ```bash
 docker compose up -d sqlserver
-dotnet run --project src/Bilheteira.Api
+dotnet run --project src/Skylane.Api
 ```
 
 A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.

@@ -17,11 +17,11 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore Bilheteira.slnx
+        run: dotnet restore Skylane.slnx
 
       - name: Build
-        run: dotnet build Bilheteira.slnx --no-restore --configuration Release
+        run: dotnet build Skylane.slnx --no-restore --configuration Release
 
       # Os testes de integração usam Testcontainers: o runner do GitHub já tem Docker.
       - name: Test
-        run: dotnet test Bilheteira.slnx --no-build --configuration Release --logger "console;verbosity=normal"
+        run: dotnet test Skylane.slnx --no-build --configuration Release --logger "console;verbosity=normal"

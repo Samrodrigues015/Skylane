@@ -21,7 +21,7 @@ services:
       sqlserver:
         condition: service_healthy
     environment:
-      ConnectionStrings__Default: "Server=sqlserver,1433;Database=Bilheteira;User Id=sa;Password=Dev_Passw0rd!;TrustServerCertificate=True"
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=Skylane;User Id=sa;Password=Dev_Passw0rd!;TrustServerCertificate=True"
     ports:
       - "8080:8080"
     restart: on-failure
