@@ -1,0 +1,36 @@
+.flaps {
+  display: flex;
+  gap: 6px;
+}
+
+.flap {
+  width: 72px;
+  height: 94px;
+  background: linear-gradient(#0f1d33 50%, #0c182b 50%);
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font: 700 66px/1 var(--font-cond);
+  color: #f6f2e4;
+  position: relative;
+  box-shadow: 0 2px 0 #050b16, inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* A linha a meio da placa, onde as duas metades se dobram. */
+.flap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: #050b16;
+}
+
+@media (max-width: 760px) {
+  .flap {
+    width: 48px;
+    height: 64px;
+    font-size: 44px;
+  }
+}

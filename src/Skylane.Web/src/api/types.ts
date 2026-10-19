@@ -1,0 +1,144 @@
+// Tipos que espelham os contratos da API (ficheiros *Contracts.cs).
+
+export type CabinClass = "Economy" | "Business";
+
+export interface Airport {
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+}
+
+export interface AirportInfo {
+  code: string;
+  city: string;
+}
+
+export interface FareInfo {
+  class: CabinClass;
+  price: number;
+  seatsLeft: number;
+}
+
+/** Horas em hora local de cada aeroporto, com offset (ex.: "2026-10-24T07:35:00+01:00"). */
+export interface FlightSummary {
+  id: string;
+  number: string;
+  airline: string;
+  origin: AirportInfo;
+  destination: AirportInfo;
+  departsAt: string;
+  arrivesAt: string;
+  durationMinutes: number;
+  fares: FareInfo[];
+}
+
+export interface SeatInfo {
+  seatNumber: string;
+  row: number;
+  letter: string;
+  class: CabinClass;
+  available: boolean;
+}
+
+export interface SeatMapResponse {
+  flight: FlightSummary;
+  seats: SeatInfo[];
+}
+
+export interface CalendarDay {
+  date: string;
+  minPrice: number | null;
+}
+
+export type DepartureStatus = "OnTime" | "Boarding" | "LastSeats";
+
+export interface DepartureInfo {
+  flightId: string;
+  number: string;
+  airline: string;
+  destination: AirportInfo;
+  departsAt: string;
+  seatsLeft: number;
+  status: DepartureStatus;
+}
+
+export interface RouteDeal {
+  origin: AirportInfo;
+  destination: AirportInfo;
+  minPrice: number;
+  durationMinutes: number;
+}
+
+export type BookingStatus = "Pending" | "Confirmed" | "Expired";
+export type LegDirection = "Outbound" | "Return";
+
+export interface BookedSeat {
+  passenger: string;
+  seatNumber: string;
+  class: CabinClass;
+  price: number;
+}
+
+export interface BookingLeg {
+  direction: LegDirection;
+  flightId: string;
+  flightNumber: string;
+  origin: AirportInfo;
+  destination: AirportInfo;
+  departsAt: string;
+  arrivesAt: string;
+  seats: BookedSeat[];
+}
+
+export interface BookingResponse {
+  reference: string;
+  status: BookingStatus;
+  contactEmail: string;
+  total: number;
+  currency: string;
+  expiresAt: string;
+  passengers: string[];
+  legs: BookingLeg[];
+}
+
+export interface PassengerRequest {
+  firstName: string;
+  lastName: string;
+  documentNumber: string;
+}
+
+export interface CreateBookingRequest {
+  contactEmail: string;
+  passengers: PassengerRequest[];
+  outbound: { flightId: string; seats: string[] };
+  return?: { flightId: string; seats: string[] };
+}
+
+export interface PayBookingRequest {
+  cardNumber: string;
+  cardHolder: string;
+  expiry: string;
+  cvc: string;
+}
+
+// ---------- Eventos ----------
+
+export interface EventResponse {
+  id: string;
+  name: string;
+  venue: string;
+  startsAt: string;
+  capacity: number;
+  available: number;
+}
+
+export interface ReservationResponse {
+  id: string;
+  eventId: string;
+  eventName: string;
+  quantity: number;
+  status: BookingStatus;
+  expiresAt: string;
+  tickets: string[];
+}

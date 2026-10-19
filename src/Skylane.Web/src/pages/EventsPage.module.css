@@ -1,0 +1,261 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cover {
+  position: relative;
+  min-height: 150px;
+  padding: 18px;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+}
+
+.cover h2 {
+  margin: 0;
+  font: 600 26px/1.05 var(--font-cond);
+  max-width: 85%;
+}
+
+.tone0 {
+  background: linear-gradient(160deg, #264272, #0b1628);
+}
+
+.tone1 {
+  background: linear-gradient(160deg, #7a2459, #2a0f25);
+}
+
+.tone2 {
+  background: linear-gradient(160deg, #1e6b5a, #0b2420);
+}
+
+.tone3 {
+  background: linear-gradient(160deg, #a5631a, #3a1f08);
+}
+
+.date {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 6px 10px;
+  text-align: center;
+  line-height: 1;
+}
+
+.date b {
+  display: block;
+  font: 700 26px var(--font-cond);
+}
+
+.date small {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.body {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.body p {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.venue {
+  color: var(--muted) !important;
+  font-size: 14px;
+}
+
+.foot {
+  margin-top: auto;
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.foot button {
+  white-space: nowrap;
+  flex: none;
+}
+
+.foot span {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.ok {
+  color: var(--green);
+}
+
+.few {
+  color: var(--amber-600);
+}
+
+.soldOut {
+  color: var(--red);
+}
+
+.error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--red-50);
+  color: #8a2a1f;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+/* ----- Diálogo de compra ----- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(11, 22, 40, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.dialog {
+  background: var(--surface);
+  border-radius: 18px;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 22px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
+}
+
+.dialogHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dialogHead h2 {
+  margin: 0;
+  font: 700 26px var(--font-cond);
+}
+
+.dialogHead span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.close {
+  border: 0;
+  background: var(--paper);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  flex: none;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stepper button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+}
+
+.stepper b {
+  font: 700 26px var(--font-cond);
+  min-width: 20px;
+  text-align: center;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--amber-50);
+  color: #7a5a0e;
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.timer b {
+  font: 700 20px var(--font-cond);
+  font-variant-numeric: tabular-nums;
+}
+
+.ticketsTitle {
+  font: 700 22px var(--font-cond);
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 2px 0 14px;
+}
+
+.tickets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.ticket {
+  border: 1px dashed var(--line-2);
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  background: var(--paper);
+}
+
+.ticket code {
+  font: 600 13px ui-monospace, Consolas, monospace;
+  word-break: break-all;
+  text-align: center;
+}

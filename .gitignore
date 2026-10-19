@@ -18,3 +18,10 @@ Thumbs.db
 ## Local secrets
 appsettings.*.local.json
 .env
+
+## Front-end
+node_modules/
+src/Skylane.Web/dist/
+# O wwwroot da API é gerado pelo build do Skylane.Web (npm run build)
+src/Skylane.Api/wwwroot/
+*.tsbuildinfo

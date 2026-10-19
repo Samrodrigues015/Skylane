@@ -1,0 +1,213 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  border-color: var(--line-2);
+}
+
+.selected,
+.selected:hover {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px var(--blue);
+}
+
+.main {
+  padding: 16px 20px;
+  min-width: 0;
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.tagGreen,
+.tagBlue {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+
+.tagGreen {
+  background: var(--green-50);
+  color: var(--green);
+}
+
+.tagBlue {
+  background: var(--blue-50);
+  color: var(--blue);
+}
+
+.leg {
+  display: grid;
+  grid-template-columns: 44px auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.airline {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font: 700 16px var(--font-cond);
+  color: #fff;
+  background: var(--navy-700);
+}
+
+/* Cor de cada companhia fictícia. */
+.LW {
+  background: #1e6b5a;
+}
+
+.time {
+  font: 700 28px/1 var(--font-cond);
+}
+
+.place {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.end {
+  text-align: right;
+}
+
+.mid {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.line {
+  height: 2px;
+  background: var(--line-2);
+  margin: 6px 0;
+  position: relative;
+}
+
+.line::before,
+.line::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--line-2);
+}
+
+.line::before {
+  left: -4px;
+}
+
+.line::after {
+  right: -4px;
+}
+
+.direct {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Lado do preço, separado por um "recorte" de bilhete. */
+.price {
+  border-left: 1px dashed var(--line-2);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+}
+
+.price::before,
+.price::after {
+  content: "";
+  position: absolute;
+  left: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.price::before {
+  top: -9px;
+}
+
+.price::after {
+  bottom: -9px;
+}
+
+.price small {
+  color: var(--muted);
+}
+
+.price b {
+  font: 700 30px/1 var(--font-cond);
+}
+
+.otherFare {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.price button {
+  margin-top: 8px;
+}
+
+.selectedBtn {
+  background: var(--navy-800);
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .price {
+    border-left: 0;
+    border-top: 1px dashed var(--line-2);
+  }
+
+  .price::before,
+  .price::after {
+    display: none;
+  }
+
+  .leg {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .airline {
+    display: none;
+  }
+}

@@ -1,0 +1,210 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Barra com o detalhe do lugar sob o rato (em vez de uma tooltip a flutuar). */
+.info {
+  position: sticky;
+  top: 8px;
+  z-index: 3;
+  width: min(420px, 100%);
+  min-height: 46px;
+  background: var(--navy-900);
+  color: #c9d4e6;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 13px;
+  text-align: center;
+}
+
+.info b {
+  color: #fff;
+  font: 700 17px var(--font-cond);
+  letter-spacing: 0.02em;
+}
+
+.fuselage {
+  position: relative;
+  isolation: isolate;
+  padding: 96px 30px 30px;
+}
+
+/* O corpo do avião fica num pseudo-elemento para as asas poderem ficar por trás dele. */
+.fuselage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #f7f8fa;
+  border: 2px solid var(--line-2);
+  border-radius: 170px 170px 30px 30px;
+}
+
+.cockpit {
+  position: absolute;
+  z-index: 1;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 44px;
+  border-radius: 60px 60px 10px 10px;
+  border: 2px solid var(--line-2);
+  border-bottom: 0;
+  background: linear-gradient(#e9edf2, #f7f8fa);
+}
+
+.wing {
+  position: absolute;
+  top: 430px;
+  width: 110px;
+  height: 160px;
+  background: #eef1f4;
+  border: 2px solid var(--line-2);
+  z-index: -1;
+}
+
+.wingLeft {
+  left: -98px;
+  border-radius: 110px 0 0 30px;
+  transform: skewY(18deg);
+}
+
+.wingRight {
+  right: -98px;
+  border-radius: 0 110px 30px 0;
+  transform: skewY(-18deg);
+}
+
+.cabinLabel,
+.row,
+.exit {
+  position: relative;
+  z-index: 1;
+}
+
+.cabinLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  margin: 6px 0 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(3, 38px) 34px repeat(3, 38px);
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 7px;
+}
+
+/* Business: 2 + 2 lugares mais largos. */
+.business {
+  grid-template-columns: 54px 54px 34px 54px 54px;
+  gap: 8px;
+}
+
+.letters span {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.rowNumber {
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.seat {
+  height: 38px;
+  border-radius: 9px 9px 5px 5px;
+  background: var(--economy);
+  border: 1px solid var(--economy-line);
+  color: #fff;
+  font: 700 15px var(--font-cond);
+  padding: 0;
+  transition: transform 0.1s, background-color 0.15s;
+}
+
+.business .seat {
+  height: 46px;
+  background: var(--business);
+  border-color: var(--business-line);
+}
+
+.seat:not(:disabled):hover {
+  transform: translateY(-2px);
+  border-color: var(--blue);
+}
+
+.seat:disabled {
+  cursor: not-allowed;
+}
+
+.seat.taken,
+.business .seat.taken {
+  background: #e5e8ec;
+  border-color: #e5e8ec;
+  position: relative;
+}
+
+.seat.taken::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  background:
+    linear-gradient(45deg, transparent 44%, #aeb6c1 44% 56%, transparent 56%),
+    linear-gradient(-45deg, transparent 44%, #aeb6c1 44% 56%, transparent 56%);
+}
+
+.seat.other {
+  opacity: 0.45;
+}
+
+.seat.mine,
+.business .seat.mine {
+  background: var(--magenta);
+  border-color: var(--magenta);
+}
+
+.exit {
+  display: flex;
+  justify-content: space-between;
+  color: #c14444;
+  font-size: 11px;
+  font-weight: 700;
+  margin: 8px -24px 10px;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 560px) {
+  .fuselage {
+    padding-inline: 14px;
+  }
+
+  .row {
+    grid-template-columns: repeat(3, 32px) 26px repeat(3, 32px);
+    gap: 4px;
+  }
+
+  .business {
+    grid-template-columns: 46px 46px 26px 46px 46px;
+  }
+
+  .wing {
+    display: none;
+  }
+}

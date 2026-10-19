@@ -2,13 +2,17 @@
 
 [![CI](https://github.com/Samrodrigues015/Skylane/actions/workflows/ci.yml/badge.svg)](https://github.com/Samrodrigues015/Skylane/actions/workflows/ci.yml)
 
-API de venda de bilhetes para **eventos** e **voos** em ASP.NET Core e SQL Server, com uma página de demonstração.
+Site de reserva de **voos** e **eventos**, com API em ASP.NET Core e SQL Server e front-end em React + TypeScript, em português e inglês.
 O foco do projeto é um problema concreto: **não vender mais bilhetes do que existem, mesmo quando centenas de pessoas compram ao mesmo tempo.**
 
 - **Eventos**: lotação sem lugares marcados (um contador por evento).
 - **Voos**: lugares marcados num mapa do avião, reservas de ida e volta e horas locais de cada aeroporto.
 
-![Página de demonstração](docs/demo.png)
+![Página inicial](docs/home.png)
+
+| Resultados da pesquisa | Escolha de lugares | Cartões de embarque |
+|---|---|---|
+| ![Resultados](docs/results.png) | ![Mapa do avião](docs/seats.png) | ![Cartões de embarque](docs/boarding-pass.png) |
 
 ## O problema
 
@@ -100,9 +104,43 @@ Decisões que vale a pena destacar:
 - **Horas em UTC na base de dados, hora local na API.** Cada aeroporto tem o seu fuso (`Europe/Lisbon`, `Atlantic/Azores`, `Europe/Madrid`...). Um voo Lisboa → Madrid que parte às 10:00 e voa 75 minutos chega às 12:15 hora de Madrid, e há testes para isso.
 - **Preço calculado sem ler os lugares.** A classe de cada lugar vem do layout do avião (filas 1–3 são Business), por isso o total é calculado antes da transação e não bloqueia em lugares que outra reserva está a prender.
 
+## Front-end
+
+React 19 + TypeScript, criado com Vite. Fica em `src/Skylane.Web` e o build vai para o `wwwroot` da API, por isso em produção é tudo servido pelo mesmo processo.
+
+O percurso de compra segue o de um site de viagens a sério:
+
+1. **Pesquisa** com aeroportos, datas, ida e volta e passageiros. A página inicial mostra um painel de partidas e as rotas mais baratas, vindos da API.
+2. **Resultados** com uma faixa de datas e o preço mais baixo de cada dia, filtros por hora, companhia e preço, e ordenação.
+3. **Passageiros**, com validação.
+4. **Lugares** num mapa do avião desenhado a partir da API. Ao continuar, os lugares ficam presos durante 15 minutos. Se alguém ficar com um deles entretanto, o mapa é recarregado e o erro é explicado.
+5. **Pagamento** com contagem decrescente e cartões de teste.
+6. **Cartões de embarque** com QR code, prontos a imprimir.
+
+Algumas decisões:
+
+- **Horas locais tratadas como texto.** A API devolve `2026-11-20T10:00:00+00:00` na hora do aeroporto. Passar isto por `new Date()` mostraria a hora no fuso de quem está a ver, por isso as horas são lidas diretamente da string.
+- **Erros traduzidos pelo `code`** do ProblemDetails (`seat_unavailable`, `card_declined`...), em vez de mostrar a mensagem da API.
+- **Estado da compra em `sessionStorage`**, para um refresh a meio não perder o que já foi escolhido.
+- **TanStack Query** para os pedidos à API, **react-i18next** para PT/EN e **CSS Modules** com variáveis de design, sem biblioteca de componentes.
+
+### Pagamento fictício
+
+O pagamento passa por uma interface `IPaymentGateway`. A implementação `FakePaymentGateway` valida o número com o algoritmo de Luhn e reage aos cartões de teste no estilo da Stripe:
+
+| Cartão | Resultado |
+|---|---|
+| `4242 4242 4242 4242` | Aprovado |
+| `4000 0000 0000 0002` | Recusado |
+| `4000 0000 0000 9995` | Sem saldo |
+
+Só se guardam os últimos 4 dígitos. Pagar uma reserva já confirmada devolve a mesma reserva, sem cobrar outra vez. Se o pagamento for aprovado mas a reserva já não puder ser confirmada, o pagamento fica marcado como reembolsado.
+
+Trocar por um gateway real seria implementar a mesma interface.
+
 ## Funcionalidades
 
-- **Reserva temporária**: os lugares ficam presos durante 10 minutos à espera de confirmação.
+- **Reserva temporária**: os lugares ficam presos à espera de confirmação (10 minutos nos eventos, 15 nos voos).
 - **Expiração automática**: um `BackgroundService` liberta os lugares das reservas não confirmadas.
 - **Confirmação idempotente**: confirmar duas vezes (duplo clique, retry de rede) devolve os mesmos bilhetes, sem emitir novos.
 - **Bilhetes com código legível** (`K7M2Q-9XH4P`), gerados com `RandomNumberGenerator` e sem caracteres ambíguos (0/O, 1/I/L).
@@ -122,7 +160,7 @@ Para testar a expiração sem esperar 10 minutos, a aplicação usa a abstraçã
 dotnet test        # precisa do Docker a correr
 ```
 
-O GitHub Actions corre o build e os testes em cada push.
+O GitHub Actions corre, em cada push, o build e os testes da API, a verificação de tipos e o build do front-end e o build da imagem Docker.
 
 ## Como correr
 
@@ -132,7 +170,7 @@ O GitHub Actions corre o build e os testes em cada push.
 docker compose up --build
 ```
 
-Abre http://localhost:8080 para a página de demonstração e http://localhost:8080/scalar para a documentação da API.
+Abre http://localhost:8080 para o site e http://localhost:8080/scalar para a documentação da API.
 
 **Para desenvolver (Visual Studio ou `dotnet run`):**
 
@@ -140,6 +178,16 @@ Abre http://localhost:8080 para a página de demonstração e http://localhost:8
 docker compose up -d sqlserver
 dotnet run --project src/Skylane.Api
 ```
+
+Noutro terminal, o front-end com hot reload (precisa do Node 20 ou mais recente):
+
+```bash
+cd src/Skylane.Web
+npm install
+npm run dev
+```
+
+Abre http://localhost:5173. O Vite reencaminha os pedidos `/api` para a API em http://localhost:5080.
 
 A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.
 
@@ -164,6 +212,10 @@ A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aer
 | `POST` | `/api/bookings` | Reserva lugares num voo, ou em dois (ida e volta) |
 | `GET` | `/api/bookings/{reference}` | Consulta uma reserva pela referência (ex.: `K7M2Q9`) |
 | `POST` | `/api/bookings/{reference}/confirm` | Confirma a reserva |
+| `POST` | `/api/bookings/{reference}/pay` | Paga a reserva com cartão (fictício) e confirma-a |
+| `GET` | `/api/flights/calendar?from=LIS&to=AMS&start=2026-11-20&days=7&passengers=1` | Preço mais baixo de cada dia |
+| `GET` | `/api/flights/deals?limit=4` | Rotas mais baratas dos próximos dias |
+| `GET` | `/api/airports/{code}/departures?limit=6` | Próximas partidas de um aeroporto |
 
 ## Decisões técnicas
 
@@ -179,9 +231,8 @@ A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aer
 
 ## Próximos passos
 
-- Front-end novo para pesquisar voos e escolher lugares no mapa do avião
-- Pagamento fictício atrás de uma interface `IPaymentGateway`, com *idempotency keys*
-- QR code nos bilhetes
+- Testes end-to-end do front-end com Playwright
+- *Idempotency keys* no pagamento
 - Teste de carga com k6
 - Rate limiting nos endpoints de reserva
 - Migrations do EF Core
@@ -189,4 +240,8 @@ A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aer
 
 ## Stack
 
-.NET 10, ASP.NET Core, EF Core 10, SQL Server 2022, xUnit, Testcontainers, Docker, GitHub Actions.
+**Back-end:** .NET 10, ASP.NET Core, EF Core 10, SQL Server 2022, xUnit, Testcontainers.
+
+**Front-end:** React 19, TypeScript, Vite, TanStack Query, React Router, react-i18next, CSS Modules.
+
+**Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions.

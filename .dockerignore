@@ -5,3 +5,5 @@ tests/
 .git/
 .github/
 docs/
+**/node_modules/
+src/Skylane.Api/wwwroot/

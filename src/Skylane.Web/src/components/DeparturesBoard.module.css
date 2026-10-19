@@ -1,0 +1,87 @@
+.board {
+  background: rgba(11, 22, 40, 0.75);
+  border: 1px solid #22385c;
+  border-radius: 14px;
+  padding: 6px 0 10px;
+  backdrop-filter: blur(4px);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px 8px;
+  color: var(--amber);
+  font: 600 15px var(--font-cond);
+  letter-spacing: 0.04em;
+}
+
+.next {
+  color: #8fa2c2;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 58px 70px 1fr 120px;
+  align-items: center;
+  min-height: 35px;
+  padding: 0 16px;
+  border-top: 1px solid #1b2c49;
+  font: 500 17px var(--font-cond);
+  color: #e9eef7;
+  letter-spacing: 0.02em;
+}
+
+.cols {
+  font: 500 12.5px var(--font);
+  color: #6f82a3;
+  border-top: 0;
+  letter-spacing: 0;
+  min-height: 24px;
+}
+
+.row b {
+  color: #f6f2e4;
+  font-weight: 600;
+}
+
+.dest {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.right {
+  text-align: right;
+}
+
+.row em {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.OnTime {
+  color: #5fcb97;
+}
+
+.Boarding {
+  color: var(--amber);
+}
+
+.LastSeats {
+  color: #f08ab8;
+}
+
+.skeleton {
+  grid-column: 1 / -1;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #15253f, #1d3050, #15253f);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

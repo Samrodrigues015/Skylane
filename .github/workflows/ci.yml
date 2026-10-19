@@ -25,3 +25,36 @@ jobs:
       # Os testes de integração usam Testcontainers: o runner do GitHub já tem Docker.
       - name: Test
         run: dotnet test Skylane.slnx --no-build --configuration Release --logger "console;verbosity=normal"
+
+  web:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: src/Skylane.Web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/Skylane.Web/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # tsc -b verifica os tipos de todo o projeto antes do vite build.
+      - name: Type check and build
+        run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, web]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t skylane:ci .
