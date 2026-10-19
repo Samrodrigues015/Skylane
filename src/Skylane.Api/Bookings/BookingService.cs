@@ -390,6 +390,7 @@ public sealed class BookingService(
                 r.Id,
                 r.EventId,
                 r.Event.Name,
+                r.Event.Category,
                 r.Event.Venue,
                 r.Event.Airport.City,
                 r.Event.Airport.TimeZoneId,
@@ -403,7 +404,7 @@ public sealed class BookingService(
 
         var events = eventRows
             .Select(r => new BookedEvent(
-                r.Id, r.EventId, r.Name, r.Venue, r.City,
+                r.Id, r.EventId, r.Name, r.Category, r.Venue, r.City,
                 AirportTime.ToLocal(r.StartsAt, r.TimeZoneId),
                 r.Quantity, r.UnitPrice, r.UnitPrice * r.Quantity, r.Status, r.Tickets))
             .ToList();

@@ -1,3 +1,4 @@
+using Skylane.Api.Events;
 using System.ComponentModel.DataAnnotations;
 using Skylane.Api.Flights;
 using Skylane.Api.Reservations;
@@ -62,6 +63,7 @@ public sealed record BookedEvent(
     Guid ReservationId,
     Guid EventId,
     string Name,
+    EventCategory Category,
     string Venue,
     string City,
     DateTimeOffset StartsAt,

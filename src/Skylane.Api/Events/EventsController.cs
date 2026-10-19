@@ -58,7 +58,7 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
             })
             .ToListAsync(ct);
 
-        return rows.Select(r => ToResponse(r.Event, r.City, r.TimeZoneId)).ToList();
+        return rows.Select(r => ToResponse(r.Event, r.City, r.TimeZoneId, English)).ToList();
     }
 
     [HttpGet("{id:guid}")]
@@ -72,7 +72,7 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
             .Select(e => new { Event = e, e.Airport.City, e.Airport.TimeZoneId })
             .FirstOrDefaultAsync(ct);
 
-        return row is null ? ToProblem(Errors.EventNotFound) : ToResponse(row.Event, row.City, row.TimeZoneId);
+        return row is null ? ToProblem(Errors.EventNotFound) : ToResponse(row.Event, row.City, row.TimeZoneId, English);
     }
 
     [HttpPost]
@@ -95,13 +95,16 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
             AirportCode = code,
             StartsAt = request.StartsAt!.Value.ToUniversalTime(),
             Capacity = request.Capacity,
-            Price = request.Price
+            Price = request.Price,
+            Category = request.Category,
+            Description = request.Description?.Trim(),
+            DescriptionEn = request.DescriptionEn?.Trim()
         };
 
         db.Events.Add(ev);
         await db.SaveChangesAsync(ct);
 
-        return CreatedAtAction(nameof(Get), new { id = ev.Id }, ToResponse(ev, airport.City, airport.TimeZoneId));
+        return CreatedAtAction(nameof(Get), new { id = ev.Id }, ToResponse(ev, airport.City, airport.TimeZoneId, English));
     }
 
     [HttpPost("{id:guid}/reservations")]
@@ -122,8 +125,13 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
         return Created($"/api/reservations/{result.Value!.Id}", result.Value);
     }
 
-    private static EventResponse ToResponse(Event e, string city, string timeZoneId) => new(
-        e.Id, e.Name, e.Venue, e.AirportCode, city,
+    /// <summary>O site é bilingue: o front-end envia Accept-Language com o idioma escolhido.</summary>
+    private bool English => Request.Headers.AcceptLanguage.ToString().StartsWith("en", StringComparison.OrdinalIgnoreCase);
+
+    private static EventResponse ToResponse(Event e, string city, string timeZoneId, bool english) => new(
+        e.Id, e.Name, e.Category,
+        english ? e.DescriptionEn ?? e.Description : e.Description,
+        e.Venue, e.AirportCode, city,
         AirportTime.ToLocal(e.StartsAt, timeZoneId),
         e.Capacity, e.Capacity - e.Reserved, e.Price, "EUR");
 }

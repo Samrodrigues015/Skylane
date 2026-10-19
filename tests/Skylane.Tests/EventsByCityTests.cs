@@ -52,6 +52,23 @@ public sealed class EventsByCityTests(ApiFactory factory)
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Descricao_vem_no_idioma_pedido()
+    {
+        var request = new CreateEventRequest("Fado ao vivo", "Sala", DateTimeOffset.UtcNow.AddDays(9), 10, "LIS", 20m,
+            EventCategory.Fado, "Fado tradicional.", "Traditional fado.");
+        var created = await (await _client.PostAsJsonAsync("/api/events", request, ApiClientExtensions.Json)).ReadAsync<EventResponse>();
+
+        var english = new HttpRequestMessage(HttpMethod.Get, $"/api/events/{created!.Id}");
+        english.Headers.AcceptLanguage.ParseAdd("en");
+        var inEnglish = await (await _client.SendAsync(english)).ReadAsync<EventResponse>();
+        var inPortuguese = await _client.GetEventAsync(created.Id);
+
+        Assert.Equal(EventCategory.Fado, inEnglish!.Category);
+        Assert.Equal("Traditional fado.", inEnglish.Description);
+        Assert.Equal("Fado tradicional.", inPortuguese.Description);
+    }
+
     private async Task<EventResponse> CreateAsync(string airport, DateOnly day, int hour)
     {
         var timeZone = airport == "FCO" ? "Europe/Rome" : "Europe/Amsterdam";

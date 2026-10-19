@@ -2,6 +2,26 @@ using Skylane.Api.Flights;
 
 namespace Skylane.Api.Events;
 
+/// <summary>Tipo de evento. O front-end usa-o para a ilustração e para explicar o que é (ex.: o que é o fado).</summary>
+public enum EventCategory
+{
+    Concert,
+    Fado,
+    Jazz,
+    Classical,
+    Opera,
+    Flamenco,
+    Guitar,
+    Electronic,
+    Festival,
+    LightFestival,
+    Comedy,
+    Cinema,
+    Food,
+    Flowers,
+    Fireworks
+}
+
 public sealed class Event
 {
     public Guid Id { get; init; }
@@ -18,6 +38,14 @@ public sealed class Event
     public DateTimeOffset StartsAt { get; set; }
 
     /// <summary>Lotação total do evento.</summary>
+    public EventCategory Category { get; set; }
+
+    /// <summary>Descrição em português.</summary>
+    public string? Description { get; set; }
+
+    /// <summary>Descrição em inglês; se faltar, usa-se a portuguesa.</summary>
+    public string? DescriptionEn { get; set; }
+
     /// <summary>Preço de cada bilhete, em euros.</summary>
     public decimal Price { get; set; }
 

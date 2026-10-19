@@ -37,6 +37,9 @@ public sealed class SkylaneDbContext(DbContextOptions<SkylaneDbContext> options)
             e.Property(x => x.Venue).HasMaxLength(120);
             e.Property(x => x.AirportCode).HasMaxLength(3);
             e.Property(x => x.Price).HasPrecision(10, 2);
+            e.Property(x => x.Category).HasConversion<string>().HasMaxLength(16);
+            e.Property(x => x.Description).HasMaxLength(600);
+            e.Property(x => x.DescriptionEn).HasMaxLength(600);
             e.Ignore(x => x.Available);
             e.HasOne(x => x.Airport).WithMany().HasForeignKey(x => x.AirportCode).OnDelete(DeleteBehavior.Restrict);
 
