@@ -118,6 +118,8 @@ O percurso de compra segue o de um site de viagens a sério:
 5. **Pagamento** com contagem decrescente e cartões de teste.
 6. **Cartões de embarque** com QR code, prontos a imprimir.
 
+Em todo o percurso (página inicial, resultados e confirmação) aparecem os **eventos da cidade de destino durante as datas da viagem**. Cada evento pertence ao aeroporto da sua cidade, por isso a ligação entre voos e eventos é só um filtro por `AirportCode` e datas. Se não houver nada nessas datas, mostra os próximos eventos da cidade.
+
 Algumas decisões:
 
 - **Horas locais tratadas como texto.** A API devolve `2026-11-20T10:00:00+00:00` na hora do aeroporto. Passar isto por `new Date()` mostraria a hora no fuso de quem está a ver, por isso as horas são lidas diretamente da string.
@@ -200,7 +202,7 @@ Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente t
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/api/events` | Lista os eventos com os lugares disponíveis |
+| `GET` | `/api/events?city=AMS&from=2026-11-20&to=2026-11-25` | Próximos eventos, opcionalmente numa cidade e entre duas datas |
 | `GET` | `/api/events/{id}` | Detalhe de um evento |
 | `POST` | `/api/events` | Cria um evento |
 | `POST` | `/api/events/{id}/reservations` | Reserva lugares (`{ "quantity": 2 }`) |

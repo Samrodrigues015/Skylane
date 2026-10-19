@@ -8,6 +8,7 @@ import FlightCard from "../components/FlightCard";
 import { AlertIcon } from "../components/Icons";
 import Steps from "../components/Steps";
 import TripSummary from "../components/TripSummary";
+import DestinationEvents from "../components/DestinationEvents";
 import { errorMessage } from "../lib/errors";
 import { fareFor, searchFromQuery, searchToQuery, useFlow } from "../lib/flow";
 import { addDays, clockTime, dayNumber, duration, longDate, minutesOfDay, money, moneyShort, shortDate, todayIso, weekdayShort } from "../lib/format";
@@ -334,6 +335,8 @@ export default function FlightsPage() {
 
           <TripSummary search={search} outbound={state.outbound} inbound={state.inbound} />
         </div>
+
+        <DestinationEvents city={search.to} from={search.depart} to={search.return ?? addDays(search.depart, 7)} />
       </div>
     </main>
   );

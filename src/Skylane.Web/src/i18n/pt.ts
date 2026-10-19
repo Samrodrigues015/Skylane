@@ -193,8 +193,9 @@ const pt = {
     noSeats: "Os lugares desta reserva foram libertados.",
   },
   events: {
+    allCities: "Todas as cidades",
     title: "Eventos",
-    lead: "Concertos, fado e stand-up no Porto e em Gaia.",
+    lead: "Concertos, festivais e espetáculos em todos os destinos para onde voamos.",
     available_one: "{{count}} lugar disponível",
     available_other: "{{count}} lugares disponíveis",
     soldOut: "Esgotado",
@@ -208,6 +209,13 @@ const pt = {
     close: "Fechar",
     ticketCount_one: "{{count}} bilhete",
     ticketCount_other: "{{count}} bilhetes",
+  },
+  destinationEvents: {
+    during: "Durante a tua viagem",
+    duringLead: "Eventos nas datas em que vais estar lá.",
+    upcoming: "Próximos eventos",
+    upcomingLead: "Não há eventos nas datas da viagem, mas estes vêm a seguir.",
+    all: "Ver todos",
   },
   common: {
     loading: "A carregar…",

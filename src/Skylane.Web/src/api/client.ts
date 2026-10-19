@@ -74,7 +74,12 @@ export const api = {
   payBooking: (reference: string, body: PayBookingRequest) =>
     post<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/pay`, body),
 
-  events: () => request<EventResponse[]>("/api/events"),
+  events: (filter: { city?: string; from?: string; to?: string; limit?: number } = {}) => {
+    const q = new URLSearchParams();
+    Object.entries(filter).forEach(([key, value]) => value !== undefined && q.set(key, String(value)));
+    const query = q.toString();
+    return request<EventResponse[]>(`/api/events${query ? `?${query}` : ""}`);
+  },
   reserveEvent: (eventId: string, quantity: number) =>
     post<ReservationResponse>(`/api/events/${eventId}/reservations`, { quantity }),
   confirmReservation: (reservationId: string) =>

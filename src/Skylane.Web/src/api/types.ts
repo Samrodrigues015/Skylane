@@ -128,6 +128,10 @@ export interface EventResponse {
   id: string;
   name: string;
   venue: string;
+  /** Aeroporto da cidade do evento (ex.: "AMS"). */
+  airportCode: string;
+  city: string;
+  /** Hora local da cidade do evento. */
   startsAt: string;
   capacity: number;
   available: number;

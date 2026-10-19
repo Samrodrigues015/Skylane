@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
 import type { EventResponse, ReservationResponse } from "../api/types";
@@ -14,13 +15,42 @@ const MAX_TICKETS = 6;
 
 export default function EventsPage() {
   const { t } = useTranslation();
-  const events = useQuery({ queryKey: ["events"], queryFn: api.events });
+  const [params, setParams] = useSearchParams();
+  const city = params.get("city") ?? undefined;
+
+  const airports = useQuery({ queryKey: ["airports"], queryFn: api.airports, staleTime: Infinity });
+  const events = useQuery({ queryKey: ["events", city], queryFn: () => api.events({ city }) });
   const [selected, setSelected] = useState<EventResponse | null>(null);
+
+  // Vindo de "Em Amesterdão durante a tua viagem": abre logo a compra do evento escolhido.
+  const eventParam = params.get("event");
+  useEffect(() => {
+    if (!eventParam || !events.data) return;
+    const ev = events.data.find((e) => e.id === eventParam);
+    if (ev) setSelected(ev);
+    params.delete("event");
+    setParams(params, { replace: true });
+  }, [eventParam, events.data, params, setParams]);
+
+  const chooseCity = (code?: string) => setParams(code ? { city: code } : {});
 
   return (
     <main className="wrap page">
       <h1 className="page-title">{t("events.title")}</h1>
       <p className="page-lead">{t("events.lead")}</p>
+
+      <div className={styles.cities} role="group" aria-label={t("events.allCities")}>
+        <button type="button" aria-pressed={!city} onClick={() => chooseCity()}>
+          {t("events.allCities")}
+        </button>
+        {[...(airports.data ?? [])]
+          .sort((a, b) => a.city.localeCompare(b.city))
+          .map((a) => (
+            <button key={a.code} type="button" aria-pressed={city === a.code} onClick={() => chooseCity(a.code)}>
+              {a.city}
+            </button>
+          ))}
+      </div>
 
       {events.isLoading && <p>{t("common.loading")}</p>}
       {events.isError && (
@@ -46,7 +76,9 @@ export default function EventsPage() {
                 <p>
                   {longDate(day)} · {clockTime(ev.startsAt)}
                 </p>
-                <p className={styles.venue}>{ev.venue}</p>
+                <p className={styles.venue}>
+                  {ev.venue} · <b>{ev.city}</b>
+                </p>
                 <div className={styles.foot}>
                   <span className={soldOut ? styles.soldOut : ev.available <= 10 ? styles.few : styles.ok}>
                     {soldOut ? t("events.soldOut") : t("events.available", { count: ev.available })}

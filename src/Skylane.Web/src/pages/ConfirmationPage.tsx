@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate, useParams } from "react-router";
 import { api } from "../api/client";
 import BoardingPass from "../components/BoardingPass";
+import DestinationEvents from "../components/DestinationEvents";
 import { AlertIcon, CheckIcon, PrinterIcon } from "../components/Icons";
 import { errorMessage } from "../lib/errors";
 import { useFlow } from "../lib/flow";
+import { addDays, isoDate } from "../lib/format";
 import styles from "./ConfirmationPage.module.css";
 
 export default function ConfirmationPage() {
@@ -46,6 +48,8 @@ export default function ConfirmationPage() {
   if (booking.status !== "Confirmed") return <Navigate to={`/manage?ref=${booking.reference}`} replace />;
 
   const firstName = booking.passengers[0]?.split(" ")[0] ?? "";
+  const outbound = booking.legs.find((l) => l.direction === "Outbound") ?? booking.legs[0];
+  const inbound = booking.legs.find((l) => l.direction === "Return");
 
   return (
     <main className="wrap page">
@@ -85,6 +89,12 @@ export default function ConfirmationPage() {
           </div>
         </section>
       ))}
+
+      <DestinationEvents
+        city={outbound.destination.code}
+        from={isoDate(outbound.arrivesAt)}
+        to={inbound ? isoDate(inbound.departsAt) : addDays(isoDate(outbound.arrivesAt), 7)}
+      />
     </main>
   );
 }

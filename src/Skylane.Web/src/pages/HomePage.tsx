@@ -4,11 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { api } from "../api/client";
 import DeparturesBoard from "../components/DeparturesBoard";
+import DestinationEvents from "../components/DestinationEvents";
 import FlapBoard from "../components/FlapBoard";
 import { SwapIcon } from "../components/Icons";
 import SearchForm from "../components/SearchForm";
 import { searchToQuery, useFlow, type SearchParams } from "../lib/flow";
-import { addDays, dayNumber, duration, isoDate, money, monthShort, todayIso } from "../lib/format";
+import { addDays, duration, money, todayIso } from "../lib/format";
 import styles from "./HomePage.module.css";
 
 const defaultSearch = (): SearchParams => {
@@ -28,7 +29,6 @@ export default function HomePage() {
 
   const airports = useQuery({ queryKey: ["airports"], queryFn: api.airports, staleTime: Infinity });
   const deals = useQuery({ queryKey: ["deals"], queryFn: () => api.deals(4) });
-  const events = useQuery({ queryKey: ["events"], queryFn: api.events });
 
   const city = (code: string) => airports.data?.find((a) => a.code === code)?.city ?? code;
 
@@ -111,27 +111,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <h2>{t("home.eventsTitle")}</h2>
-            <Link to="/events">{t("home.allEvents")}</Link>
-          </div>
-          <div className={styles.events}>
-            {events.data?.slice(0, 3).map((ev, i) => (
-              <Link key={ev.id} to="/events" className={`${styles.event} ${styles[`tone${i % 3}`]}`}>
-                <div className={styles.date}>
-                  <b>{dayNumber(isoDate(ev.startsAt))}</b>
-                  <small>{monthShort(isoDate(ev.startsAt))}</small>
-                </div>
-                {ev.available > 0 && ev.available <= 10 && (
-                  <span className={styles.last}>{t("home.lastTickets", { count: ev.available })}</span>
-                )}
-                <h3>{ev.name}</h3>
-                <p>{ev.venue}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <DestinationEvents city={search.to} from={search.depart} to={search.return ?? addDays(search.depart, 7)} />
       </div>
     </main>
   );

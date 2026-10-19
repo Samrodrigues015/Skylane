@@ -195,8 +195,9 @@ const en: Messages = {
     noSeats: "The seats for this booking were released.",
   },
   events: {
+    allCities: "All cities",
     title: "Events",
-    lead: "Concerts, fado and stand-up in Porto and Gaia.",
+    lead: "Concerts, festivals and shows in every destination we fly to.",
     available_one: "{{count}} seat available",
     available_other: "{{count}} seats available",
     soldOut: "Sold out",
@@ -210,6 +211,13 @@ const en: Messages = {
     close: "Close",
     ticketCount_one: "{{count}} ticket",
     ticketCount_other: "{{count}} tickets",
+  },
+  destinationEvents: {
+    during: "During your trip",
+    duringLead: "Events on the dates you'll be there.",
+    upcoming: "Coming up",
+    upcomingLead: "Nothing on your travel dates, but these are next.",
+    all: "See all",
   },
   common: {
     loading: "Loading…",
