@@ -4,10 +4,12 @@ import type { CardPayment } from "../api/types";
 import checkout from "../pages/Checkout.module.css";
 import styles from "./CardForm.module.css";
 
-const TEST_CARDS = [
-  { number: "4242 4242 4242 4242", label: "payment.testApproved", tone: "ok" },
-  { number: "4000 0000 0000 0002", label: "payment.testDeclined", tone: "bad" },
-  { number: "4000 0000 0000 9995", label: "payment.testFunds", tone: "bad" },
+const APPROVED_CARD = "4242 4242 4242 4242";
+
+/** Cartões que simulam erros do banco, para ver como o site reage (ficam escondidos por omissão). */
+const ERROR_CARDS = [
+  { number: "4000 0000 0000 0002", label: "payment.testDeclined" },
+  { number: "4000 0000 0000 9995", label: "payment.testFunds" },
 ] as const;
 
 const digits = (v: string) => v.replace(/\D/g, "");
@@ -40,6 +42,7 @@ export default function CardForm({ id, holder = "", disabled, onSubmit }: Props)
   const { t } = useTranslation();
   const [card, setCard] = useState({ number: "", holder: "", expiry: "", cvc: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const errors = {
     number: digits(card.number).length < 13,
@@ -69,15 +72,25 @@ export default function CardForm({ id, holder = "", disabled, onSubmit }: Props)
   return (
     <form id={id} onSubmit={submit} noValidate>
       <div className={styles.testCards}>
-        <span>{t("payment.testCards")}</span>
-        <div>
-          {TEST_CARDS.map((c) => (
-            <button key={c.number} type="button" className={`${styles.chip} ${styles[c.tone]}`} onClick={() => fillTestCard(c.number)}>
-              <code>{c.number}</code>
-              <small>{t(c.label)}</small>
-            </button>
-          ))}
+        <div className={styles.testMain}>
+          <span>{t("payment.testCards")}</span>
+          <button type="button" className="btn btn-blue" onClick={() => fillTestCard(APPROVED_CARD)}>
+            {t("payment.useTestCard")}
+          </button>
         </div>
+        <button type="button" className={styles.errorsToggle} aria-expanded={showErrors} onClick={() => setShowErrors(!showErrors)}>
+          {t("payment.tryErrors")}
+        </button>
+        {showErrors && (
+          <div className={styles.errorCards}>
+            {ERROR_CARDS.map((c) => (
+              <button key={c.number} type="button" className={styles.chip} onClick={() => fillTestCard(c.number)}>
+                <code>{c.number}</code>
+                <small>{t(c.label)}</small>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={styles.fields}>

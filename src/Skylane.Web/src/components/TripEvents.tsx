@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import EventImage from "./EventImage";
 import { api } from "../api/client";
 import type { BookingResponse, EventResponse } from "../api/types";
 import { errorMessage } from "../lib/errors";
@@ -78,6 +79,7 @@ function EventRow(props: {
   return (
     <article className={styles.row}>
       <div className={styles.date}>
+        <EventImage className={styles.thumb} category={event.category} seed={event.name} width={120} />
         <b>{dayNumber(day)}</b>
         <small>{monthShort(day)}</small>
       </div>

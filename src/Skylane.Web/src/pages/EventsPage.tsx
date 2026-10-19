@@ -1,26 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useNavigate, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import type { EventResponse } from "../api/types";
+import EventImage from "../components/EventImage";
 import { AlertIcon, ArrowRightIcon, CartIcon, CheckIcon, MinusIcon, PlusIcon } from "../components/Icons";
 import { MAX_TICKETS, useCart } from "../lib/cart";
 import { errorMessage } from "../lib/errors";
 import { clockTime, dayNumber, isoDate, longDate, money, monthShort } from "../lib/format";
 import styles from "./EventsPage.module.css";
 
-
 export default function EventsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [params, setParams] = useSearchParams();
   const city = params.get("city") ?? undefined;
 
   const airports = useQuery({ queryKey: ["airports"], queryFn: api.airports, staleTime: Infinity });
-  const events = useQuery({ queryKey: ["events", city], queryFn: () => api.events({ city }) });
+  // O idioma entra na chave: as descrições vêm da API no idioma do site.
+  const events = useQuery({ queryKey: ["events", city, i18n.language], queryFn: () => api.events({ city }) });
   const [selected, setSelected] = useState<EventResponse | null>(null);
 
-  // Vindo de "Em Amesterdão durante a tua viagem": abre logo a compra do evento escolhido.
+  // Vindo de "Durante a tua viagem": abre logo o evento escolhido.
   const eventParam = params.get("event");
   useEffect(() => {
     if (!eventParam || !events.data) return;
@@ -58,34 +59,37 @@ export default function EventsPage() {
       )}
 
       <div className={styles.grid}>
-        {events.data?.map((ev, i) => {
+        {events.data?.map((ev) => {
           const day = isoDate(ev.startsAt);
           const soldOut = ev.available === 0;
           return (
             <article key={ev.id} className={styles.card}>
-              <div className={`${styles.cover} ${styles[`tone${i % 4}`]}`}>
-                <div className={styles.date}>
+              <button type="button" className={styles.cover} onClick={() => setSelected(ev)} aria-label={ev.name}>
+                <EventImage category={ev.category} seed={ev.name} width={560} />
+                <span className={styles.category}>{t(`eventCategory.${ev.category}.name`)}</span>
+                <span className={styles.date}>
                   <b>{dayNumber(day)}</b>
                   <small>{monthShort(day)}</small>
-                </div>
-                <h2>{ev.name}</h2>
-              </div>
+                </span>
+              </button>
               <div className={styles.body}>
-                <p>
-                  {longDate(day)} · {clockTime(ev.startsAt)}
+                <span className={styles.cityLabel}>{ev.city}</span>
+                <h2>{ev.name}</h2>
+                <p className={styles.meta}>
+                  {longDate(day)} · {clockTime(ev.startsAt)} · {ev.venue}
                 </p>
-                <p className={styles.venue}>
-                  {ev.venue} · <b>{ev.city}</b>
-                </p>
-                <p className={styles.cardPrice}>
-                  <b>{money(ev.price, ev.currency)}</b> {t("events.perTicket")}
-                </p>
+                {ev.description && <p className={styles.description}>{ev.description}</p>}
                 <div className={styles.foot}>
-                  <span className={soldOut ? styles.soldOut : ev.available <= 10 ? styles.few : styles.ok}>
-                    {soldOut ? t("events.soldOut") : t("events.available", { count: ev.available })}
-                  </span>
+                  <div>
+                    <p className={styles.cardPrice}>
+                      <b>{money(ev.price, ev.currency)}</b> {t("events.perTicket")}
+                    </p>
+                    <span className={soldOut ? styles.soldOut : ev.available <= 10 ? styles.few : styles.ok}>
+                      {soldOut ? t("events.soldOut") : t("events.available", { count: ev.available })}
+                    </span>
+                  </div>
                   <button type="button" className="btn btn-primary" disabled={soldOut} onClick={() => setSelected(ev)}>
-                    {t("events.buy")}
+                    {t("events.details")}
                   </button>
                 </div>
               </div>
@@ -94,12 +98,12 @@ export default function EventsPage() {
         })}
       </div>
 
-      {selected && <TicketDialog event={selected} onClose={() => setSelected(null)} />}
+      {selected && <EventDialog event={selected} onClose={() => setSelected(null)} />}
     </main>
   );
 }
 
-function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () => void }) {
+function EventDialog({ event, onClose }: { event: EventResponse; onClose: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const cart = useCart();
@@ -107,6 +111,7 @@ function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () =>
   const max = Math.max(0, Math.min(MAX_TICKETS - inCart, event.available - inCart));
   const [quantity, setQuantity] = useState(Math.min(1, max));
   const [added, setAdded] = useState(false);
+  const day = isoDate(event.startsAt);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -125,28 +130,42 @@ function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () =>
         className={styles.dialog}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="ticket-title"
+        aria-labelledby="event-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className={styles.dialogHead}>
-          <div>
-            <h2 id="ticket-title">{event.name}</h2>
-            <span>
-              {longDate(isoDate(event.startsAt))} · {clockTime(event.startsAt)} · {event.venue}
-            </span>
-          </div>
+        <div className={styles.banner}>
+          <EventImage category={event.category} seed={event.name} width={700} />
           <button type="button" className={styles.close} onClick={onClose} aria-label={t("events.close")}>
             ×
           </button>
-        </header>
+        </div>
 
-        {!added ? (
-          <>
-            <div className={styles.step}>
+        <div className={styles.dialogBody}>
+          <span className={styles.chip}>{t(`eventCategory.${event.category}.name`)}</span>
+          <h2 id="event-title">{event.name}</h2>
+          <p className={styles.meta}>
+            {longDate(day)} · {clockTime(event.startsAt)}
+            <br />
+            {event.venue} · {event.city}
+          </p>
+
+          {event.description && <p className={styles.fullDescription}>{event.description}</p>}
+
+          <aside className={styles.about}>
+            <b>{t(`eventCategory.${event.category}.aboutTitle`)}</b>
+            <p>{t(`eventCategory.${event.category}.about`)}</p>
+          </aside>
+
+          {!added ? (
+            <div className={styles.buy}>
               <div>
-                <span className={styles.label}>{t("events.tickets")}</span>
-                <small className={styles.each}>{t("tripEvents.each", { price: money(event.price, event.currency) })}</small>
-                {inCart > 0 && <small className={styles.each}>{t("cart.inCart")}: {inCart}</small>}
+                <b className={styles.buyPrice}>{money(event.price, event.currency)}</b>
+                <small className={styles.each}>{t("events.perTicket")}</small>
+                {inCart > 0 && (
+                  <small className={styles.each}>
+                    {t("cart.inCart")}: {inCart}
+                  </small>
+                )}
               </div>
               <div className={styles.stepper}>
                 <button type="button" aria-label="-" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)}>
@@ -161,27 +180,27 @@ function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () =>
                 <CartIcon /> {t("events.addToCart", { amount: money(event.price * quantity, event.currency) })}
               </button>
             </div>
-            <p className={styles.muted}>{t("events.cartHint")}</p>
-          </>
-        ) : (
-          <div className={styles.added}>
-            <span className={styles.addedIcon}>
-              <CheckIcon />
-            </span>
-            <div>
-              <b>{t("cart.added")}</b>
-              <span>{t("cart.addedText", { count: quantity, name: event.name })}</span>
+          ) : (
+            <div className={styles.added}>
+              <span className={styles.addedIcon}>
+                <CheckIcon />
+              </span>
+              <div>
+                <b>{t("cart.added")}</b>
+                <span>{t("cart.addedText", { count: quantity, name: event.name })}</span>
+              </div>
+              <div className={styles.addedActions}>
+                <button type="button" className="btn btn-ghost" onClick={onClose}>
+                  {t("cart.keepBrowsing")}
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => navigate("/cart")}>
+                  {t("cart.view")} <ArrowRightIcon />
+                </button>
+              </div>
             </div>
-            <div className={styles.addedActions}>
-              <button type="button" className="btn btn-ghost" onClick={onClose}>
-                {t("cart.keepBrowsing")}
-              </button>
-              <button type="button" className="btn btn-primary" onClick={() => navigate("/cart")}>
-                {t("cart.view")} <ArrowRightIcon />
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+          {!added && <p className={styles.hint}>{t("events.cartHint")}</p>}
+        </div>
       </div>
     </div>
   );

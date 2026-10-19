@@ -122,6 +122,7 @@ Em todo o percurso (página inicial, resultados e confirmação) aparecem os **e
 
 Algumas decisões:
 
+- **Eventos com descrição em PT e EN.** A API devolve a descrição no idioma do `Accept-Language`, que o front-end envia com o idioma escolhido. A explicação de cada tipo de evento (o que é o fado, o flamenco...) fica no front-end, junto das outras traduções.
 - **Horas locais tratadas como texto.** A API devolve `2026-11-20T10:00:00+00:00` na hora do aeroporto. Passar isto por `new Date()` mostraria a hora no fuso de quem está a ver, por isso as horas são lidas diretamente da string.
 - **Erros traduzidos pelo `code`** do ProblemDetails (`seat_unavailable`, `card_declined`...), em vez de mostrar a mensagem da API.
 - **Estado da compra em `sessionStorage`**, para um refresh a meio não perder o que já foi escolhido.
@@ -260,6 +261,6 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 
 **Back-end:** .NET 10, ASP.NET Core, EF Core 10, SQL Server 2022, xUnit, Testcontainers.
 
-**Front-end:** React 19, TypeScript, Vite, TanStack Query, React Router, react-i18next, CSS Modules.
+**Front-end:** React 19, TypeScript, Vite, TanStack Query, React Router, react-i18next, CSS Modules. Fotografias dos eventos do [Unsplash](https://unsplash.com) (licença Unsplash).
 
 **Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions.

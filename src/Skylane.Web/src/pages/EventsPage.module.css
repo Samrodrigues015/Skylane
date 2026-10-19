@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .cities button {
@@ -23,55 +23,57 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 22px;
 }
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
 }
 
 .cover {
   position: relative;
-  min-height: 150px;
-  padding: 18px;
-  display: flex;
-  align-items: flex-end;
-  color: #fff;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--navy-900);
 }
 
-.cover h2 {
-  margin: 0;
-  font: 600 26px/1.05 var(--font-cond);
-  max-width: 85%;
-}
-
-.tone0 {
-  background: linear-gradient(160deg, #264272, #0b1628);
-}
-
-.tone1 {
-  background: linear-gradient(160deg, #7a2459, #2a0f25);
-}
-
-.tone2 {
-  background: linear-gradient(160deg, #1e6b5a, #0b2420);
-}
-
-.tone3 {
-  background: linear-gradient(160deg, #a5631a, #3a1f08);
+.category {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 4px 10px;
 }
 
 .date {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(255, 255, 255, 0.14);
+  top: 12px;
+  right: 12px;
+  background: rgba(11, 22, 40, 0.65);
+  backdrop-filter: blur(4px);
+  color: #fff;
   border-radius: 10px;
   padding: 6px 10px;
   text-align: center;
@@ -80,37 +82,57 @@
 
 .date b {
   display: block;
-  font: 700 26px var(--font-cond);
+  font: 700 24px var(--font-cond);
 }
 
 .date small {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 
 .body {
-  padding: 14px 18px 18px;
+  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-.body p {
-  margin: 0;
-  color: var(--ink-2);
+.cityLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--magenta);
 }
 
-.venue {
-  color: var(--muted) !important;
+.body h2 {
+  margin: 2px 0 4px;
+  font: 600 26px/1.1 var(--font-cond);
+}
+
+.meta {
+  margin: 0;
+  color: var(--muted);
   font-size: 14px;
+}
+
+.description {
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  font-size: 14.5px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .foot {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
 }
 
@@ -119,8 +141,19 @@
   flex: none;
 }
 
-.foot span {
+.cardPrice {
+  margin: 0;
+  color: var(--muted);
   font-size: 13.5px;
+}
+
+.cardPrice b {
+  font: 700 24px var(--font-cond);
+  color: var(--ink);
+}
+
+.foot span {
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -146,13 +179,13 @@
   padding: 10px 12px;
 }
 
-/* ----- Diálogo de compra ----- */
+/* ----- Detalhe do evento ----- */
 
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(11, 22, 40, 0.55);
+  background: rgba(11, 22, 40, 0.6);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -160,54 +193,98 @@
 
 .dialog {
   background: var(--surface);
-  border-radius: 18px;
-  width: min(560px, 100%);
+  border-radius: 20px;
+  width: min(680px, 100%);
   max-height: calc(100vh - 32px);
   overflow: auto;
-  padding: 22px;
   box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
 }
 
-.dialogHead {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.dialogHead h2 {
-  margin: 0;
-  font: 700 26px var(--font-cond);
-}
-
-.dialogHead span {
-  color: var(--muted);
-  font-size: 14px;
+.banner {
+  position: relative;
+  height: 220px;
 }
 
 .close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   border: 0;
-  background: var(--paper);
-  width: 36px;
-  height: 36px;
+  background: rgba(255, 255, 255, 0.92);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   font-size: 22px;
   line-height: 1;
-  flex: none;
 }
 
-.step {
+.dialogBody {
+  padding: 20px 26px 24px;
+}
+
+.chip {
+  display: inline-block;
+  background: var(--paper);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.dialogBody h2 {
+  margin: 8px 0 4px;
+  font: 700 32px/1.05 var(--font-cond);
+}
+
+.fullDescription {
+  margin: 14px 0 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.about {
+  margin-top: 16px;
+  background: var(--amber-50);
+  border: 1px solid #f5dda0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.about b {
+  font: 700 17px var(--font-cond);
+  color: #7a5a0e;
+}
+
+.about p {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5c4610;
+}
+
+.buy {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
   border-top: 1px solid var(--line);
+  margin-top: 18px;
   padding-top: 16px;
 }
 
-.label {
-  font-weight: 600;
+.buyPrice {
+  font: 700 26px var(--font-cond);
+}
+
+.each {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .stepper {
@@ -236,121 +313,10 @@
   text-align: center;
 }
 
-.timer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--amber-50);
-  color: #7a5a0e;
-  border-radius: 999px;
-  padding: 6px 14px;
-}
-
-.timer b {
-  font: 700 20px var(--font-cond);
-  font-variant-numeric: tabular-nums;
-}
-
-.ticketsTitle {
-  font: 700 22px var(--font-cond);
-  margin: 0;
-}
-
-.muted {
-  color: var(--muted);
-  margin: 2px 0 14px;
-}
-
-.tickets {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
-}
-
-.ticket {
-  border: 1px dashed var(--line-2);
-  border-radius: 12px;
-  padding: 14px;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  background: var(--paper);
-}
-
-.ticket code {
-  font: 600 13px ui-monospace, Consolas, monospace;
-  word-break: break-all;
-  text-align: center;
-}
-
-.cardPrice {
-  margin-top: 10px !important;
-  color: var(--muted) !important;
-  font-size: 13.5px;
-}
-
-.cardPrice b {
-  font: 700 22px var(--font-cond);
-  color: var(--ink);
-}
-
-.progress {
-  list-style: none;
-  display: flex;
-  gap: 6px;
-  margin: 0 0 16px;
-  padding: 0;
-  counter-reset: step;
-}
-
-.progress li {
-  flex: 1;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--muted);
-  border-top: 3px solid var(--line);
-  padding-top: 6px;
-  counter-increment: step;
-}
-
-.progress li::before {
-  content: counter(step) ". ";
-}
-
-.progress .current {
-  color: var(--blue);
-  border-color: var(--blue);
-}
-
-.progress .done {
-  color: var(--green);
-  border-color: var(--green);
-}
-
-.each {
-  display: block;
+.hint {
   color: var(--muted);
   font-size: 13px;
-}
-
-.payHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.payHead b {
-  font: 700 18px var(--font-cond);
-}
-
-.payButton {
-  width: 100%;
-  margin-top: 16px;
-  padding: 13px;
-  font-size: 16px;
+  margin: 12px 0 0;
 }
 
 .added {
@@ -359,6 +325,7 @@
   gap: 12px;
   align-items: center;
   border-top: 1px solid var(--line);
+  margin-top: 18px;
   padding-top: 16px;
 }
 
@@ -376,7 +343,7 @@
   height: 40px;
   border-radius: 50%;
   background: var(--green);
-  color: #fff;
+  color: #fff !important;
   display: grid !important;
   place-items: center;
 }
@@ -387,4 +354,18 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .banner {
+    height: 170px;
+  }
+
+  .dialogBody {
+    padding: 16px 18px 20px;
+  }
 }

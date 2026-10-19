@@ -41,7 +41,7 @@
 }
 
 .date {
-  background: linear-gradient(160deg, #7a2459, #2a0f25);
+  background: var(--navy-800);
   color: #fff;
   border-radius: 10px;
   text-align: center;
@@ -136,4 +136,24 @@
   .row > button {
     grid-column: 1 / -1;
   }
+}
+
+.date {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.thumb {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.date::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(6, 10, 20, 0.5);
 }

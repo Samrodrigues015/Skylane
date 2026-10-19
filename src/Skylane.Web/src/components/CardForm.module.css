@@ -6,18 +6,35 @@
   margin-bottom: 18px;
 }
 
-.testCards > span {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-2);
-  margin-bottom: 8px;
+.testMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.testCards > div {
+.testMain span {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.errorsToggle {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-decoration: underline;
+}
+
+.errorCards {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .chip {
@@ -45,11 +62,7 @@
   font-weight: 600;
 }
 
-.ok small {
-  color: var(--green);
-}
-
-.bad small {
+.chip small {
   color: var(--red);
 }
 

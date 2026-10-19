@@ -10,6 +10,7 @@ import type {
   RouteDeal,
   SeatMapResponse,
 } from "./types";
+import i18n from "../i18n";
 
 /**
  * Erro devolvido pela API no formato ProblemDetails.
@@ -32,7 +33,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     response = await fetch(path, {
       ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      // O idioma do site vai no Accept-Language: a API devolve as descrições dos eventos nesse idioma.
+      headers: { "Content-Type": "application/json", "Accept-Language": i18n.language, ...init?.headers },
     });
   } catch {
     throw new ApiError(0, "network_error", "Network error");

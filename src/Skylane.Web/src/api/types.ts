@@ -128,9 +128,29 @@ export interface CardPayment {
 
 // ---------- Eventos ----------
 
+export type EventCategory =
+  | "Concert"
+  | "Fado"
+  | "Jazz"
+  | "Classical"
+  | "Opera"
+  | "Flamenco"
+  | "Guitar"
+  | "Electronic"
+  | "Festival"
+  | "LightFestival"
+  | "Comedy"
+  | "Cinema"
+  | "Food"
+  | "Flowers"
+  | "Fireworks";
+
 export interface EventResponse {
   id: string;
   name: string;
+  category: EventCategory;
+  /** No idioma do site (a API usa o Accept-Language). */
+  description: string | null;
   venue: string;
   /** Aeroporto da cidade do evento (ex.: "AMS"). */
   airportCode: string;
@@ -168,6 +188,7 @@ export interface BookedEvent {
   reservationId: string;
   eventId: string;
   name: string;
+  category: EventCategory;
   venue: string;
   city: string;
   startsAt: string;

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { api } from "../api/client";
 import { clockTime, dayNumber, isoDate, money, monthShort, shortDate } from "../lib/format";
+import EventImage from "./EventImage";
 import styles from "./DestinationEvents.module.css";
 
 interface Props {
@@ -55,8 +56,9 @@ export default function DestinationEvents({ city, from, to, exclude = [] }: Prop
             <Link
               key={ev.id}
               to={`/events?city=${city}&event=${ev.id}`}
-              className={`${styles.event} ${styles[`tone${i % 3}`]}`}
+              className={styles.event}
             >
+              <EventImage className={styles.photo} category={ev.category} seed={ev.name} width={i === 0 ? 640 : 420} />
               <div className={styles.date}>
                 <b>{dayNumber(day)}</b>
                 <small>{monthShort(day)}</small>
