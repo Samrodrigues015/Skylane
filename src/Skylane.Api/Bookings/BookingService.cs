@@ -17,6 +17,7 @@ namespace Skylane.Api.Bookings;
 public sealed class BookingService(
     SkylaneDbContext db,
     TimeProvider time,
+    ReservationService reservations,
     IOptions<BookingOptions> options)
 {
     private const string Currency = "EUR";
@@ -29,16 +30,39 @@ public sealed class BookingService(
     {
         // ---------- 1. Validar o pedido (sem tocar na base de dados) ----------
 
-        var passengerCount = request.Passengers.Count;
-        if (passengerCount < 1 || passengerCount > _options.MaxPassengers)
+        var events = request.Events ?? new List<EventSelection>();
+        var passengers = request.Passengers ?? new List<PassengerRequest>();
+
+        if (request.Outbound is null && events.Count == 0)
         {
-            return Errors.InvalidPassengerCount(_options.MaxPassengers);
+            return Errors.EmptyBooking;
         }
 
-        var legs = new List<Leg> { ToLeg(LegDirection.Outbound, request.Outbound) };
+        if (request.Outbound is null && request.Return is not null)
+        {
+            return Errors.InvalidReturnFlight;
+        }
+
+        if (events.Select(e => e.EventId).Distinct().Count() != events.Count)
+        {
+            return Errors.EventAlreadyInBooking;
+        }
+
+        var legs = new List<Leg>();
+        if (request.Outbound is not null)
+        {
+            legs.Add(ToLeg(LegDirection.Outbound, request.Outbound));
+        }
+
         if (request.Return is not null)
         {
             legs.Add(ToLeg(LegDirection.Return, request.Return));
+        }
+
+        var passengerCount = passengers.Count;
+        if (legs.Count > 0 && (passengerCount < 1 || passengerCount > _options.MaxPassengers))
+        {
+            return Errors.InvalidPassengerCount(_options.MaxPassengers);
         }
 
         foreach (var leg in legs)
@@ -130,13 +154,14 @@ public sealed class BookingService(
             Reference = BookingReference.Generate(),
             Status = BookingStatus.Pending,
             ContactEmail = request.ContactEmail.Trim().ToLowerInvariant(),
-            OutboundFlightId = legs[0].FlightId,
+            OutboundFlightId = legs.Count > 0 ? legs[0].FlightId : null,
             ReturnFlightId = legs.Count == 2 ? legs[1].FlightId : null,
             Total = total,
             Currency = Currency,
             CreatedAt = now,
             ExpiresAt = now.AddMinutes(_options.HoldMinutes),
-            Passengers = request.Passengers.Select(p => new Passenger
+            // Numa compra só de eventos não há passageiros.
+            Passengers = (legs.Count > 0 ? passengers : new List<PassengerRequest>()).Select(p => new Passenger
             {
                 Id = Guid.CreateVersion7(),
                 FirstName = p.FirstName.Trim(),
@@ -181,6 +206,21 @@ public sealed class BookingService(
                 // Basta um lugar falhar para desfazer tudo: a reserva e os lugares já presos.
                 await transaction.RollbackAsync(ct);
                 return Errors.SeatUnavailable(assignment.Seat);
+            }
+        }
+
+        // Bilhetes para eventos que vinham no carrinho: presos na mesma transação e com o mesmo
+        // prazo que os lugares do avião. Se um evento esgotar, nada fica reservado.
+        // Também por ordem fixa (do Id), pela mesma razão dos lugares: evitar deadlocks.
+        foreach (var selection in events.OrderBy(e => e.EventId))
+        {
+            var held = await reservations.HoldAsync(
+                selection.EventId!.Value, selection.Quantity, booking.Id, booking.ExpiresAt, ct);
+
+            if (held is not null)
+            {
+                await transaction.RollbackAsync(ct);
+                return held;
             }
         }
 
@@ -267,7 +307,12 @@ public sealed class BookingService(
             return null;
         }
 
-        var flightIds = new List<Guid> { booking.OutboundFlightId };
+        var flightIds = new List<Guid>();
+        if (booking.OutboundFlightId is { } outboundId)
+        {
+            flightIds.Add(outboundId);
+        }
+
         if (booking.ReturnFlightId is { } returnId)
         {
             flightIds.Add(returnId);

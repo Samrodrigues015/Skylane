@@ -28,10 +28,15 @@ public sealed class BookingEventsService(SkylaneDbContext db, BookingService boo
         var bookingId = await BookingIdAsync(booking.Reference, ct);
 
         // Mesmo prazo que os lugares do avião: expiram juntos se ninguém pagar.
-        var reservation = await reservations.CreateAsync(eventId, request.Quantity, ct, bookingId, booking.ExpiresAt);
-        if (!reservation.IsSuccess)
+        await using (var transaction = await db.Database.BeginTransactionAsync(ct))
         {
-            return reservation.Error!;
+            var held = await reservations.HoldAsync(eventId, request.Quantity, bookingId, booking.ExpiresAt, ct);
+            if (held is not null)
+            {
+                return held;
+            }
+
+            await transaction.CommitAsync(ct);
         }
 
         return (await bookings.GetAsync(booking.Reference, ct))!;

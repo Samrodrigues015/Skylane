@@ -51,6 +51,9 @@ public static class Errors
     public static readonly Error BookingExpired =
         new(ErrorType.Gone, "booking_expired", "A reserva expirou e os lugares foram libertados.");
 
+    public static readonly Error EmptyBooking =
+        new(ErrorType.Validation, "empty_booking", "O carrinho está vazio: escolhe um voo ou bilhetes para um evento.");
+
     public static readonly Error BookingAlreadyPaid =
         new(ErrorType.Conflict, "booking_already_paid", "Esta reserva já está paga e não pode ser alterada.");
 

@@ -24,8 +24,9 @@ public sealed class Booking
 
     public required string ContactEmail { get; init; }
 
-    public Guid OutboundFlightId { get; init; }
-    public Flight OutboundFlight { get; init; } = null!;
+    /// <summary>Voo de ida. Vazio numa compra só de bilhetes para eventos.</summary>
+    public Guid? OutboundFlightId { get; init; }
+    public Flight? OutboundFlight { get; init; }
 
     /// <summary>Voo de regresso. Null numa reserva só de ida.</summary>
     public Guid? ReturnFlightId { get; init; }

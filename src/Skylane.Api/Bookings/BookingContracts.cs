@@ -25,11 +25,18 @@ public sealed record FlightSelection(
 ///   "return":   { "flightId": "...", "seats": [ "14C" ] }
 /// }
 /// </example>
+public sealed record EventSelection([Required] Guid? EventId, [Range(1, 10)] int Quantity);
+
+/// <summary>
+/// O carrinho inteiro: voos (só ida ou ida e volta), bilhetes para eventos, ou as duas coisas.
+/// Tem de ter pelo menos um voo ou um evento. Os passageiros só são precisos com voos.
+/// </summary>
 public sealed record CreateBookingRequest(
     [Required, EmailAddress, StringLength(254)] string ContactEmail,
-    [Required] List<PassengerRequest> Passengers,
-    [Required] FlightSelection Outbound,
-    FlightSelection? Return);
+    List<PassengerRequest>? Passengers,
+    FlightSelection? Outbound,
+    FlightSelection? Return,
+    List<EventSelection>? Events = null);
 
 public enum LegDirection
 {

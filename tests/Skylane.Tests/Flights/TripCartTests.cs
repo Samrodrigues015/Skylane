@@ -98,6 +98,70 @@ public sealed class TripCartTests(ApiFactory factory)
         Assert.Empty(current.Tickets);
     }
 
+    [Fact]
+    public async Task Carrinho_so_com_eventos_paga_e_emite_os_bilhetes()
+    {
+        var concert = await _client.CreateEventAsync(capacity: 10);
+        var fado = await _client.CreateEventAsync(capacity: 10);
+
+        var response = await _client.PostAsJsonAsync("/api/bookings", new CreateBookingRequest(
+            "ana@exemplo.pt", null, null, null,
+            [new EventSelection(concert.Id, 2), new EventSelection(fado.Id, 1)]), ApiClientExtensions.Json);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var cart = (await response.ReadAsync<BookingResponse>())!;
+        Assert.Empty(cart.Legs);
+        Assert.Equal(75m, cart.Total);
+
+        var paid = (await (await _client.ConfirmBookingAsync(cart.Reference)).ReadAsync<BookingResponse>())!;
+
+        Assert.Equal(BookingStatus.Confirmed, paid.Status);
+        Assert.Equal(3, paid.Events.Sum(e => e.Tickets.Count));
+    }
+
+    [Fact]
+    public async Task Voo_e_eventos_reservados_no_mesmo_pedido()
+    {
+        var flight = await _client.CreateFlightAsync(economy: 80m);
+        var ev = await _client.CreateEventAsync(capacity: 10);
+
+        var response = await _client.PostAsJsonAsync("/api/bookings", Request(flight.Id, "26C", ev.Id, 1), ApiClientExtensions.Json);
+        var cart = (await response.ReadAsync<BookingResponse>())!;
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(80m + 25m, cart.Total);
+        Assert.Single(cart.Events);
+    }
+
+    [Fact]
+    public async Task Evento_esgotado_no_carrinho_nao_deixa_nada_reservado()
+    {
+        var flight = await _client.CreateFlightAsync();
+        var ev = await _client.CreateEventAsync(capacity: 1);
+
+        var response = await _client.PostAsJsonAsync("/api/bookings", Request(flight.Id, "27C", ev.Id, 2), ApiClientExtensions.Json);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.True(await _client.IsSeatAvailableAsync(flight.Id, "27C"));
+        Assert.Equal(1, (await _client.GetEventAsync(ev.Id)).Available);
+    }
+
+    [Fact]
+    public async Task Carrinho_vazio_e_recusado()
+    {
+        var response = await _client.PostAsJsonAsync("/api/bookings",
+            new CreateBookingRequest("ana@exemplo.pt", null, null, null), ApiClientExtensions.Json);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    private static CreateBookingRequest Request(Guid flightId, string seat, Guid eventId, int tickets) => new(
+        "ana@exemplo.pt",
+        [new PassengerRequest("Ana", "Costa", "DOC123")],
+        new FlightSelection(flightId, [seat]),
+        null,
+        [new EventSelection(eventId, tickets)]);
+
     private Task<HttpResponseMessage> AddEventAsync(string reference, Guid eventId, int quantity) =>
         _client.PostAsJsonAsync($"/api/bookings/{reference}/events", new AddEventRequest(eventId, quantity), ApiClientExtensions.Json);
 }

@@ -23,59 +23,70 @@ public sealed class ReservationService(
 {
     private readonly ReservationOptions _options = options.Value;
 
-    /// <param name="bookingId">Se os bilhetes vão juntos com uma viagem: a reserva de voos.</param>
-    /// <param name="expiresAt">Prazo da reserva; por omissão, agora + HoldMinutes.</param>
-    public async Task<Result<ReservationResponse>> CreateAsync(
-        Guid eventId, int quantity, CancellationToken ct, Guid? bookingId = null, DateTimeOffset? expiresAt = null)
+    public async Task<Result<ReservationResponse>> CreateAsync(Guid eventId, int quantity, CancellationToken ct)
+    {
+        var now = time.GetUtcNow();
+        var id = Guid.CreateVersion7();
+
+        // A transação garante que o contador e a reserva mudam juntos:
+        // se a inserção da reserva falhar, o incremento do contador é desfeito.
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        var error = await HoldAsync(eventId, quantity, bookingId: null, now.AddMinutes(_options.HoldMinutes), ct, id);
+        if (error is not null)
+        {
+            return error;
+        }
+
+        await transaction.CommitAsync(ct);
+        return (await GetAsync(id, ct))!;
+    }
+
+    /// <summary>
+    /// Prende <paramref name="quantity"/> lugares do evento e cria a reserva pendente.
+    /// Não abre transação: quem chama decide (uma reserva sozinha, ou o carrinho inteiro de uma viagem).
+    /// </summary>
+    /// <returns>null se correu bem; o erro (esgotado, evento inexistente...) caso contrário.</returns>
+    public async Task<Error?> HoldAsync(
+        Guid eventId, int quantity, Guid? bookingId, DateTimeOffset expiresAt, CancellationToken ct, Guid? reservationId = null)
     {
         if (quantity < 1 || quantity > _options.MaxTicketsPerReservation)
         {
             return Errors.InvalidQuantity(_options.MaxTicketsPerReservation);
         }
 
-        // A transação garante que o contador e a reserva mudam juntos:
-        // se a inserção da reserva falhar, o incremento do contador é desfeito.
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
         // UPDATE Events SET Reserved = Reserved + @q
-        // WHERE Id = @id AND Reserved + @q <= Capacity
+        // WHERE Id = @id AND Reserved + @q <= Capacity AND StartsAt > agora
+        var now = time.GetUtcNow();
         var seatsTaken = await db.Events
-            .Where(e => e.Id == eventId && e.Reserved + quantity <= e.Capacity)
+            .Where(e => e.Id == eventId && e.Reserved + quantity <= e.Capacity && e.StartsAt > now)
             .ExecuteUpdateAsync(s => s.SetProperty(e => e.Reserved, e => e.Reserved + quantity), ct);
 
         if (seatsTaken == 0)
         {
-            // Nada foi alterado: ou o evento não existe, ou não há lugares que cheguem.
-            var exists = await db.Events.AnyAsync(e => e.Id == eventId, ct);
+            // Nada foi alterado: ou o evento não existe (ou já passou), ou não há lugares que cheguem.
+            var exists = await db.Events.AnyAsync(e => e.Id == eventId && e.StartsAt > now, ct);
             return exists ? Errors.SoldOut : Errors.EventNotFound;
         }
 
-        var now = time.GetUtcNow();
         var price = await db.Events.Where(e => e.Id == eventId).Select(e => e.Price).SingleAsync(ct);
 
-        var reservation = new Reservation
+        db.Reservations.Add(new Reservation
         {
-            Id = Guid.CreateVersion7(),
+            Id = reservationId ?? Guid.CreateVersion7(),
             EventId = eventId,
             Quantity = quantity,
             UnitPrice = price,
             BookingId = bookingId,
             Status = ReservationStatus.Pending,
             CreatedAt = now,
-            ExpiresAt = expiresAt ?? now.AddMinutes(_options.HoldMinutes)
-        };
+            ExpiresAt = expiresAt
+        });
 
-        db.Reservations.Add(reservation);
         await db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
-
-        return (await GetAsync(reservation.Id, ct))!;
+        return null;
     }
 
-    /// <summary>
-    /// Confirma a compra e emite os bilhetes. É idempotente: confirmar duas vezes
-    /// a mesma reserva devolve os mesmos bilhetes, sem emitir novos.
-    /// </summary>
     public async Task<Result<ReservationResponse>> ConfirmAsync(Guid reservationId, CancellationToken ct)
     {
         var now = time.GetUtcNow();
