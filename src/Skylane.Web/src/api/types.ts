@@ -100,6 +100,8 @@ export interface BookingResponse {
   expiresAt: string;
   passengers: string[];
   legs: BookingLeg[];
+  /** Eventos juntos à viagem (já incluídos no total). */
+  events: BookedEvent[];
 }
 
 export interface PassengerRequest {
@@ -115,7 +117,7 @@ export interface CreateBookingRequest {
   return?: { flightId: string; seats: string[] };
 }
 
-export interface PayBookingRequest {
+export interface CardPayment {
   cardNumber: string;
   cardHolder: string;
   expiry: string;
@@ -135,14 +137,41 @@ export interface EventResponse {
   startsAt: string;
   capacity: number;
   available: number;
+  price: number;
+  currency: string;
 }
+
+export type ReservationStatus = "Pending" | "Confirmed" | "Expired" | "Cancelled";
 
 export interface ReservationResponse {
   id: string;
   eventId: string;
   eventName: string;
+  venue: string;
+  city: string;
+  startsAt: string;
   quantity: number;
-  status: BookingStatus;
+  unitPrice: number;
+  total: number;
+  currency: string;
+  status: ReservationStatus;
   expiresAt: string;
+  /** Se os bilhetes fazem parte de uma viagem. */
+  bookingReference: string | null;
+  tickets: string[];
+}
+
+/** Bilhetes de um evento juntos à viagem. */
+export interface BookedEvent {
+  reservationId: string;
+  eventId: string;
+  name: string;
+  venue: string;
+  city: string;
+  startsAt: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  status: ReservationStatus;
   tickets: string[];
 }

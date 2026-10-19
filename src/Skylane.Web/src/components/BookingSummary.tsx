@@ -5,7 +5,14 @@ import { clockTime, isoDate, money, shortDate } from "../lib/format";
 import styles from "./BookingSummary.module.css";
 
 /** Resumo de uma reserva já criada (dados vindos da API, com os preços finais). */
-export default function BookingSummary({ booking, children }: { booking: BookingResponse; children?: ReactNode }) {
+interface Props {
+  booking: BookingResponse;
+  /** Se indicado, cada evento tem um botão para o tirar da viagem (só antes de pagar). */
+  onRemoveEvent?: (reservationId: string) => void;
+  children?: ReactNode;
+}
+
+export default function BookingSummary({ booking, onRemoveEvent, children }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -39,6 +46,35 @@ export default function BookingSummary({ booking, children }: { booking: Booking
           </ul>
         </div>
       ))}
+
+      {booking.events.length > 0 && (
+        <div className={styles.leg}>
+          <small>{t("tripEvents.inTrip")}</small>
+          <ul className={styles.events}>
+            {booking.events.map((ev) => (
+              <li key={ev.reservationId}>
+                <span className={styles.eventName}>
+                  <b>{ev.name}</b>
+                  <span>
+                    {shortDate(isoDate(ev.startsAt))} · {clockTime(ev.startsAt)} · {t("tripEvents.tickets", { count: ev.quantity })}
+                  </span>
+                </span>
+                <span className={styles.price}>{money(ev.total, booking.currency)}</span>
+                {onRemoveEvent && ev.status === "Pending" && (
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    aria-label={t("tripEvents.remove", { name: ev.name })}
+                    onClick={() => onRemoveEvent(ev.reservationId)}
+                  >
+                    ×
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className={styles.total}>
         <span>{t("summary.totalFor", { count: booking.passengers.length })}</span>

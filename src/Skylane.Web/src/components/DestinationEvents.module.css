@@ -70,6 +70,13 @@
   font-size: 14px;
 }
 
+.price {
+  margin-top: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--amber);
+}
+
 .date {
   position: absolute;
   top: 16px;

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { api } from "../api/client";
-import { clockTime, dayNumber, isoDate, monthShort, shortDate } from "../lib/format";
+import { clockTime, dayNumber, isoDate, money, monthShort, shortDate } from "../lib/format";
 import styles from "./DestinationEvents.module.css";
 
 interface Props {
@@ -11,13 +11,15 @@ interface Props {
   /** Primeiro e último dia da estadia (yyyy-MM-dd). */
   from: string;
   to: string;
+  /** Eventos a não mostrar (ex.: os que já estão na reserva). */
+  exclude?: string[];
 }
 
 /**
  * Eventos na cidade de destino durante a viagem. Se não houver nenhum nessas datas,
  * mostra os próximos eventos da cidade, para a secção nunca ficar vazia sem explicação.
  */
-export default function DestinationEvents({ city, from, to }: Props) {
+export default function DestinationEvents({ city, from, to, exclude = [] }: Props) {
   const { t } = useTranslation();
 
   const query = useQuery({
@@ -30,7 +32,7 @@ export default function DestinationEvents({ city, from, to }: Props) {
     staleTime: 60_000,
   });
 
-  const events = query.data?.events ?? [];
+  const events = (query.data?.events ?? []).filter((e) => !exclude.includes(e.id));
   if (events.length === 0) return null;
 
   const cityName = events[0].city;
@@ -66,6 +68,7 @@ export default function DestinationEvents({ city, from, to }: Props) {
               <p>
                 {shortDate(day)} · {clockTime(ev.startsAt)} · {ev.venue}
               </p>
+              <span className={styles.price}>{t("tripEvents.each", { price: money(ev.price, ev.currency) })}</span>
             </Link>
           );
         })}

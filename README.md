@@ -141,11 +141,18 @@ Só se guardam os últimos 4 dígitos. Pagar uma reserva já confirmada devolve 
 
 Trocar por um gateway real seria implementar a mesma interface.
 
+### Eventos no carrinho da viagem
+
+No passo do pagamento, o site mostra os eventos no destino durante a estadia e deixa **juntá-los à viagem**. Os bilhetes ficam presos com o mesmo prazo que os lugares do avião, aparecem no resumo (com opção de retirar) e entram no total. Paga-se tudo de uma vez: o mesmo pagamento confirma os voos e emite os bilhetes, que aparecem com QR code junto aos cartões de embarque.
+
+Na página de Eventos também se compram bilhetes sem voo, com o mesmo fluxo: escolher a quantidade, lugares guardados durante 10 minutos, pagamento e bilhetes.
+
 ## Funcionalidades
 
 - **Reserva temporária**: os lugares ficam presos à espera de confirmação (10 minutos nos eventos, 15 nos voos).
 - **Expiração automática**: um `BackgroundService` liberta os lugares das reservas não confirmadas.
-- **Confirmação idempotente**: confirmar duas vezes (duplo clique, retry de rede) devolve os mesmos bilhetes, sem emitir novos.
+- **Pagamento idempotente**: pagar duas vezes ao mesmo tempo (duplo clique, retry de rede) cobra uma só vez e devolve os mesmos bilhetes. Um lock por reserva (`sp_getapplock`) faz o segundo pedido esperar pelo primeiro.
+- **Só se confirma pagando**: não há nenhum endpoint para confirmar uma reserva sem pagamento.
 - **Bilhetes com código legível** (`K7M2Q-9XH4P`), gerados com `RandomNumberGenerator` e sem caracteres ambíguos (0/O, 1/I/L).
 - **Check-in** à entrada, com proteção contra uso duplicado.
 - **Erros no formato ProblemDetails** (RFC 9457), com um `code` para o front-end reagir.
@@ -196,6 +203,8 @@ A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aer
 
 Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente também tem voos: são criados no momento da primeira pesquisa (ver *Voos criados a pedido* em baixo).
 
+A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresher`) corre no arranque e de 6 em 6 horas e acrescenta os voos das rotas principais dos próximos 30 dias e as sessões dos eventos dos próximos 120 dias (cada evento repete-se a um ritmo fixo). Seja qual for o dia em que alguém abre o site, há voos e bilhetes à venda.
+
 > Se já tinhas a base de dados de uma versão anterior, apaga-a com `docker compose down` antes de arrancar: o `EnsureCreated` só cria tabelas numa base de dados nova.
 
 ## Endpoints
@@ -207,7 +216,7 @@ Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente t
 | `POST` | `/api/events` | Cria um evento |
 | `POST` | `/api/events/{id}/reservations` | Reserva lugares (`{ "quantity": 2 }`) |
 | `GET` | `/api/reservations/{id}` | Estado de uma reserva |
-| `POST` | `/api/reservations/{id}/confirm` | Confirma a compra e emite os bilhetes |
+| `POST` | `/api/reservations/{id}/pay` | Paga os bilhetes com cartão (fictício) e emite-os |
 | `GET` | `/api/tickets/{code}` | Detalhe de um bilhete |
 | `POST` | `/api/tickets/{code}/check-in` | Valida o bilhete à entrada |
 | `GET` | `/api/airports` | Lista os aeroportos |
@@ -216,8 +225,9 @@ Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente t
 | `POST` | `/api/flights` | Cria um voo e todos os seus lugares |
 | `POST` | `/api/bookings` | Reserva lugares num voo, ou em dois (ida e volta) |
 | `GET` | `/api/bookings/{reference}` | Consulta uma reserva pela referência (ex.: `K7M2Q9`) |
-| `POST` | `/api/bookings/{reference}/confirm` | Confirma a reserva |
-| `POST` | `/api/bookings/{reference}/pay` | Paga a reserva com cartão (fictício) e confirma-a |
+| `POST` | `/api/bookings/{reference}/events` | Junta bilhetes de um evento à viagem (`{ "eventId": "...", "quantity": 2 }`) |
+| `DELETE` | `/api/bookings/{reference}/events/{reservationId}` | Retira o evento da viagem e devolve os lugares |
+| `POST` | `/api/bookings/{reference}/pay` | Paga a viagem (voos e eventos) e emite cartões de embarque e bilhetes |
 | `GET` | `/api/flights/calendar?from=LIS&to=AMS&start=2026-11-20&days=7&passengers=1` | Preço mais baixo de cada dia |
 | `GET` | `/api/flights/deals?limit=4` | Rotas mais baratas dos próximos dias |
 | `GET` | `/api/airports/{code}/departures?limit=6` | Próximas partidas de um aeroporto |

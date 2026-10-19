@@ -1,0 +1,139 @@
+.section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.head span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--magenta);
+}
+
+.head h2 {
+  margin: 2px 0 2px;
+  font: 600 20px var(--font-cond);
+}
+
+.head p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto auto auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.date {
+  background: linear-gradient(160deg, #7a2459, #2a0f25);
+  color: #fff;
+  border-radius: 10px;
+  text-align: center;
+  padding: 6px 0;
+  line-height: 1;
+}
+
+.date b {
+  display: block;
+  font: 700 22px var(--font-cond);
+}
+
+.date small {
+  font-size: 11px;
+}
+
+.info {
+  min-width: 0;
+  display: grid;
+}
+
+.info h3 {
+  margin: 0;
+  font: 600 17px var(--font-cond);
+}
+
+.info span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.info .error {
+  color: var(--red);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+}
+
+.stepper b {
+  min-width: 14px;
+  text-align: center;
+  font: 700 18px var(--font-cond);
+}
+
+.price {
+  display: grid;
+  text-align: right;
+  min-width: 80px;
+}
+
+.price b {
+  font: 700 18px var(--font-cond);
+}
+
+.price small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .row {
+    grid-template-columns: 52px 1fr;
+  }
+
+  .stepper,
+  .price {
+    grid-column: 2;
+  }
+
+  .price {
+    text-align: left;
+  }
+
+  .row > button {
+    grid-column: 1 / -1;
+  }
+}

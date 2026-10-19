@@ -282,3 +282,73 @@
   word-break: break-all;
   text-align: center;
 }
+
+.cardPrice {
+  margin-top: 10px !important;
+  color: var(--muted) !important;
+  font-size: 13.5px;
+}
+
+.cardPrice b {
+  font: 700 22px var(--font-cond);
+  color: var(--ink);
+}
+
+.progress {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  counter-reset: step;
+}
+
+.progress li {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  border-top: 3px solid var(--line);
+  padding-top: 6px;
+  counter-increment: step;
+}
+
+.progress li::before {
+  content: counter(step) ". ";
+}
+
+.progress .current {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.progress .done {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.each {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.payHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.payHead b {
+  font: 700 18px var(--font-cond);
+}
+
+.payButton {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px;
+  font-size: 16px;
+}

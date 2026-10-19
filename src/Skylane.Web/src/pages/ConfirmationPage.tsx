@@ -8,7 +8,8 @@ import DestinationEvents from "../components/DestinationEvents";
 import { AlertIcon, CheckIcon, PrinterIcon } from "../components/Icons";
 import { errorMessage } from "../lib/errors";
 import { useFlow } from "../lib/flow";
-import { addDays, isoDate } from "../lib/format";
+import { addDays, clockTime, isoDate, shortDate } from "../lib/format";
+import { QRCodeSVG } from "qrcode.react";
 import styles from "./ConfirmationPage.module.css";
 
 export default function ConfirmationPage() {
@@ -90,10 +91,36 @@ export default function ConfirmationPage() {
         </section>
       ))}
 
+      {booking.events.length > 0 && (
+        <section className={styles.leg}>
+          <h2>{t("tripEvents.yourTickets")}</h2>
+          <div className={styles.eventTickets}>
+            {booking.events.flatMap((ev) =>
+              ev.tickets.map((code) => (
+                <article key={code} className={styles.eventTicket}>
+                  <QRCodeSVG value={code} size={92} marginSize={0} />
+                  <div>
+                    <b>{ev.name}</b>
+                    <span>
+                      {shortDate(isoDate(ev.startsAt))} · {clockTime(ev.startsAt)}
+                    </span>
+                    <span>
+                      {ev.venue} · {ev.city}
+                    </span>
+                    <code>{code}</code>
+                  </div>
+                </article>
+              )),
+            )}
+          </div>
+        </section>
+      )}
+
       <DestinationEvents
         city={outbound.destination.code}
         from={isoDate(outbound.arrivesAt)}
         to={inbound ? isoDate(inbound.departsAt) : addDays(isoDate(outbound.arrivesAt), 7)}
+        exclude={booking.events.map((e) => e.eventId)}
       />
     </main>
   );

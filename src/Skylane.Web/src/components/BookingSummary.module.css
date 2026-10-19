@@ -77,6 +77,52 @@
   text-align: right;
 }
 
+.events {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.events li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: start;
+  font-size: 14px;
+}
+
+.eventName {
+  min-width: 0;
+}
+
+.eventName b {
+  display: block;
+  font: 600 16px var(--font-cond);
+}
+
+.eventName span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.remove {
+  border: 0;
+  background: var(--paper);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  line-height: 1;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.remove:hover {
+  background: var(--red-50);
+  color: var(--red);
+}
+
 .total {
   display: flex;
   justify-content: space-between;

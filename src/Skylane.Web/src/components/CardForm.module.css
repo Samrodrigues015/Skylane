@@ -1,0 +1,76 @@
+.testCards {
+  background: var(--paper);
+  border: 1px dashed var(--line-2);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 18px;
+}
+
+.testCards > span {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+
+.testCards > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: grid;
+  text-align: left;
+  gap: 1px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  padding: 7px 11px;
+  transition: border-color 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--blue);
+}
+
+.chip code {
+  font: 600 13.5px ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color: var(--ink);
+}
+
+.chip small {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ok small {
+  color: var(--green);
+}
+
+.bad small {
+  color: var(--red);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.invalid {
+  color: var(--red);
+  font-size: 13.5px;
+  margin: 12px 0 0;
+}
+
+@media (max-width: 560px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}

@@ -68,6 +68,47 @@
   max-width: 820px;
 }
 
+.eventTickets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+  max-width: 820px;
+}
+
+.eventTicket {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--magenta);
+  border-radius: 14px;
+  padding: 16px;
+  break-inside: avoid;
+}
+
+.eventTicket div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.eventTicket b {
+  font: 600 19px var(--font-cond);
+}
+
+.eventTicket span {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.eventTicket code {
+  margin-top: 6px;
+  font: 600 14px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.06em;
+}
+
 .error {
   display: flex;
   gap: 10px;

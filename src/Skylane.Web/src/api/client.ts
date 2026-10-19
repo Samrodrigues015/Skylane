@@ -6,7 +6,7 @@ import type {
   DepartureInfo,
   EventResponse,
   FlightSummary,
-  PayBookingRequest,
+  CardPayment,
   ReservationResponse,
   RouteDeal,
   SeatMapResponse,
@@ -71,7 +71,7 @@ export const api = {
   createBooking: (body: CreateBookingRequest) => post<BookingResponse>("/api/bookings", body),
   getBooking: (reference: string) =>
     request<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}`),
-  payBooking: (reference: string, body: PayBookingRequest) =>
+  payBooking: (reference: string, body: CardPayment) =>
     post<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/pay`, body),
 
   events: (filter: { city?: string; from?: string; to?: string; limit?: number } = {}) => {
@@ -82,6 +82,10 @@ export const api = {
   },
   reserveEvent: (eventId: string, quantity: number) =>
     post<ReservationResponse>(`/api/events/${eventId}/reservations`, { quantity }),
-  confirmReservation: (reservationId: string) =>
-    post<ReservationResponse>(`/api/reservations/${reservationId}/confirm`),
+  payReservation: (reservationId: string, card: CardPayment) =>
+    post<ReservationResponse>(`/api/reservations/${reservationId}/pay`, card),
+  addBookingEvent: (reference: string, eventId: string, quantity: number) =>
+    post<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/events`, { eventId, quantity }),
+  removeBookingEvent: (reference: string, reservationId: string) =>
+    request<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/events/${reservationId}`, { method: "DELETE" }),
 };
