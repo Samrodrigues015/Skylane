@@ -66,4 +66,18 @@ public static class Errors
 
     public static Error SeatUnavailable(string seat) =>
         new(ErrorType.Conflict, "seat_unavailable", $"O lugar {seat} já não está disponível. Escolhe outro.");
+
+    // ---------- Pagamentos ----------
+
+    public static readonly Error CardDeclined =
+        new(ErrorType.PaymentRequired, "card_declined", "O pagamento foi recusado pelo banco. Experimenta outro cartão.");
+
+    public static readonly Error InsufficientFunds =
+        new(ErrorType.PaymentRequired, "insufficient_funds", "O cartão não tem saldo suficiente.");
+
+    public static readonly Error InvalidCard =
+        new(ErrorType.Validation, "invalid_card", "O número do cartão não é válido.");
+
+    public static readonly Error CardExpired =
+        new(ErrorType.Validation, "card_expired", "O cartão está fora de validade.");
 }

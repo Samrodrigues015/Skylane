@@ -5,7 +5,8 @@ public enum ErrorType
     Validation,
     NotFound,
     Conflict,
-    Gone
+    Gone,
+    PaymentRequired
 }
 
 /// <summary>

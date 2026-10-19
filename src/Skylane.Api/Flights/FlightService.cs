@@ -63,6 +63,148 @@ public sealed class FlightService(SkylaneDbContext db, TimeProvider time)
         return Result<IReadOnlyList<FlightSummary>>.Success(available);
     }
 
+    /// <summary>
+    /// Preço mais baixo de cada dia, a partir de <paramref name="start"/>, para a faixa de datas
+    /// dos resultados (como no Skyscanner). Uma só query para todos os dias.
+    /// </summary>
+    public async Task<Result<IReadOnlyList<CalendarDay>>> GetCalendarAsync(
+        string from, string to, DateOnly start, int days, int passengers, CancellationToken ct)
+    {
+        from = from.Trim().ToUpperInvariant();
+        to = to.Trim().ToUpperInvariant();
+
+        if (from == to)
+        {
+            return Errors.SameAirports;
+        }
+
+        if (passengers is < 1 or > MaxPassengersPerSearch)
+        {
+            return Errors.InvalidPassengerCount(MaxPassengersPerSearch);
+        }
+
+        var origin = await db.Airports.AsNoTracking().FirstOrDefaultAsync(a => a.Code == from, ct);
+        if (origin is null)
+        {
+            return Errors.AirportNotFound(from);
+        }
+
+        days = Math.Clamp(days, 1, 14);
+        var rangeStart = AirportTime.FromLocal(start.ToDateTime(TimeOnly.MinValue), origin.TimeZoneId);
+        var rangeEnd = AirportTime.FromLocal(start.AddDays(days).ToDateTime(TimeOnly.MinValue), origin.TimeZoneId);
+        var now = time.GetUtcNow();
+
+        var flights = await LoadSummariesAsync(db.Flights.Where(f =>
+            f.OriginCode == from &&
+            f.DestinationCode == to &&
+            f.Status == FlightStatus.Scheduled &&
+            f.DepartsAt >= rangeStart &&
+            f.DepartsAt < rangeEnd &&
+            f.DepartsAt > now), ct);
+
+        // DepartsAt já vem na hora local da origem, por isso a data local é a data do dia do voo.
+        var cheapestByDay = flights
+            .SelectMany(f => f.Fares
+                .Where(fare => fare.SeatsLeft >= passengers)
+                .Select(fare => new { Date = DateOnly.FromDateTime(f.DepartsAt.DateTime), fare.Price }))
+            .GroupBy(x => x.Date)
+            .ToDictionary(g => g.Key, g => g.Min(x => x.Price));
+
+        var calendar = Enumerable.Range(0, days)
+            .Select(i => start.AddDays(i))
+            .Select(date => new CalendarDay(date, cheapestByDay.TryGetValue(date, out var price) ? price : null))
+            .ToList();
+
+        return Result<IReadOnlyList<CalendarDay>>.Success(calendar);
+    }
+
+    /// <summary>Próximas partidas de um aeroporto, para o quadro da página inicial.</summary>
+    public async Task<IReadOnlyList<DepartureInfo>?> GetDeparturesAsync(string airportCode, int limit, CancellationToken ct)
+    {
+        airportCode = airportCode.Trim().ToUpperInvariant();
+
+        if (!await db.Airports.AnyAsync(a => a.Code == airportCode, ct))
+        {
+            return null;
+        }
+
+        var now = time.GetUtcNow();
+        limit = Math.Clamp(limit, 1, 20);
+
+        var rows = await db.Flights
+            .AsNoTracking()
+            .Where(f => f.OriginCode == airportCode && f.Status == FlightStatus.Scheduled && f.DepartsAt > now)
+            .OrderBy(f => f.DepartsAt)
+            .Take(limit)
+            .Select(f => new
+            {
+                f.Id,
+                f.Number,
+                Airline = f.Airline.Name,
+                DestinationCode = f.Destination.Code,
+                DestinationCity = f.Destination.City,
+                OriginTimeZone = f.Origin.TimeZoneId,
+                f.DepartsAt,
+                SeatsLeft = f.Seats.Count(s => s.Status == SeatStatus.Available)
+            })
+            .ToListAsync(ct);
+
+        return rows.Select(r => new DepartureInfo(
+                r.Id,
+                r.Number,
+                r.Airline,
+                new AirportInfo(r.DestinationCode, r.DestinationCity),
+                AirportTime.ToLocal(r.DepartsAt, r.OriginTimeZone),
+                r.SeatsLeft,
+                r.DepartsAt - now <= TimeSpan.FromMinutes(45) ? DepartureStatus.Boarding
+                : r.SeatsLeft <= 10 ? DepartureStatus.LastSeats
+                : DepartureStatus.OnTime))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Rotas mais baratas em Economy nos voos futuros. O agrupamento e o mínimo são feitos
+    /// pelo SQL Server (GROUP BY), não em memória.
+    /// </summary>
+    public async Task<IReadOnlyList<RouteDeal>> GetDealsAsync(int limit, CancellationToken ct)
+    {
+        var now = time.GetUtcNow();
+        limit = Math.Clamp(limit, 1, 20);
+
+        var deals = await db.Flights
+            .AsNoTracking()
+            .Where(f => f.Status == FlightStatus.Scheduled && f.DepartsAt > now)
+            .SelectMany(
+                f => f.Fares.Where(fare => fare.Class == CabinClass.Economy),
+                (f, fare) => new
+                {
+                    f.OriginCode,
+                    f.DestinationCode,
+                    fare.Price,
+                    Minutes = EF.Functions.DateDiffMinute(f.DepartsAt, f.ArrivesAt)
+                })
+            .GroupBy(x => new { x.OriginCode, x.DestinationCode })
+            .Select(g => new
+            {
+                g.Key.OriginCode,
+                g.Key.DestinationCode,
+                MinPrice = g.Min(x => x.Price),
+                Minutes = g.Min(x => x.Minutes)
+            })
+            .OrderBy(x => x.MinPrice)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        var cities = await db.Airports.AsNoTracking().ToDictionaryAsync(a => a.Code, a => a.City, ct);
+
+        return deals.Select(d => new RouteDeal(
+                new AirportInfo(d.OriginCode, cities[d.OriginCode]),
+                new AirportInfo(d.DestinationCode, cities[d.DestinationCode]),
+                d.MinPrice,
+                d.Minutes))
+            .ToList();
+    }
+
     public async Task<FlightSummary?> GetAsync(Guid id, CancellationToken ct) =>
         (await LoadSummariesAsync(db.Flights.Where(f => f.Id == id), ct)).SingleOrDefault();
 

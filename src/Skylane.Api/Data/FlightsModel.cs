@@ -1,5 +1,6 @@
 using Skylane.Api.Bookings;
 using Skylane.Api.Flights;
+using Skylane.Api.Payments;
 using Microsoft.EntityFrameworkCore;
 
 namespace Skylane.Api.Data;
@@ -111,6 +112,20 @@ public static class FlightsModel
 
             // O job de expiração procura "pendentes com prazo ultrapassado".
             b.HasIndex(x => new { x.Status, x.ExpiresAt });
+        });
+
+        modelBuilder.Entity<Payment>(p =>
+        {
+            p.ToTable("Payments", t => t.HasCheckConstraint("CK_Payments_AmountPositive", "[Amount] > 0"));
+            p.Property(x => x.Amount).HasPrecision(10, 2);
+            p.Property(x => x.Currency).HasMaxLength(3);
+            p.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
+            p.Property(x => x.CardLast4).HasMaxLength(4);
+            p.Property(x => x.ProviderReference).HasMaxLength(40);
+            p.Property(x => x.DeclineCode).HasMaxLength(32);
+
+            p.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Cascade);
+            p.HasIndex(x => x.BookingId);
         });
 
         modelBuilder.Entity<Passenger>(p =>

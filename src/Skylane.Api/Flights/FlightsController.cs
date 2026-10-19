@@ -7,8 +7,19 @@ using Microsoft.EntityFrameworkCore;
 namespace Skylane.Api.Flights;
 
 [Route("api/airports")]
-public sealed class AirportsController(SkylaneDbContext db) : ApiControllerBase
+public sealed class AirportsController(SkylaneDbContext db, FlightService flights) : ApiControllerBase
 {
+    /// <summary>Próximas partidas de um aeroporto (quadro de partidas da página inicial).</summary>
+    [HttpGet("{code}/departures")]
+    [ProducesResponseType<IReadOnlyList<DepartureInfo>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<DepartureInfo>>> Departures(
+        string code, CancellationToken ct, [FromQuery] int limit = 6)
+    {
+        var departures = await flights.GetDeparturesAsync(code, limit, ct);
+        return departures is null ? ToProblem(Errors.AirportNotFound(code)) : Ok(departures);
+    }
+
     /// <summary>Lista os aeroportos, para preencher os campos de origem e destino.</summary>
     [HttpGet]
     public async Task<IReadOnlyList<AirportResponse>> List(CancellationToken ct) =>
@@ -43,6 +54,30 @@ public sealed class FlightsController(FlightService flights) : ApiControllerBase
         var result = await flights.SearchAsync(from, to, date, passengers, ct);
         return result.IsSuccess ? Ok(result.Value) : ToProblem(result.Error!);
     }
+
+    /// <summary>Preço mais baixo de cada dia, para a faixa de datas dos resultados.</summary>
+    /// <param name="start">Primeiro dia (hora local da origem).</param>
+    /// <param name="days">Número de dias (1 a 14).</param>
+    [HttpGet("calendar")]
+    [ProducesResponseType<IReadOnlyList<CalendarDay>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IReadOnlyList<CalendarDay>>> Calendar(
+        [FromQuery] string from,
+        [FromQuery] string to,
+        [FromQuery, BindRequired] DateOnly start,
+        CancellationToken ct,
+        [FromQuery] int days = 7,
+        [FromQuery] int passengers = 1)
+    {
+        var result = await flights.GetCalendarAsync(from, to, start, days, passengers, ct);
+        return result.IsSuccess ? Ok(result.Value) : ToProblem(result.Error!);
+    }
+
+    /// <summary>Rotas com o preço mais baixo em Economy.</summary>
+    [HttpGet("deals")]
+    [ProducesResponseType<IReadOnlyList<RouteDeal>>(StatusCodes.Status200OK)]
+    public async Task<IReadOnlyList<RouteDeal>> Deals(CancellationToken ct, [FromQuery] int limit = 4) =>
+        await flights.GetDealsAsync(limit, ct);
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<FlightSummary>(StatusCodes.Status200OK)]

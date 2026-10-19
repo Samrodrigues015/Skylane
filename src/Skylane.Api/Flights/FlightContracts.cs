@@ -38,3 +38,26 @@ public sealed record CreateFlightRequest(
     [Range(20, 1200)] int DurationMinutes,
     [Range(0.01, 100_000.0)] decimal EconomyPrice,
     [Range(0.01, 100_000.0)] decimal BusinessPrice);
+
+/// <summary>Preço mais baixo de um dia, para a faixa de datas dos resultados. Null = sem voos com lugares.</summary>
+public sealed record CalendarDay(DateOnly Date, decimal? MinPrice);
+
+public enum DepartureStatus
+{
+    OnTime,
+    Boarding,
+    LastSeats
+}
+
+/// <summary>Uma linha do quadro de partidas de um aeroporto.</summary>
+public sealed record DepartureInfo(
+    Guid FlightId,
+    string Number,
+    string Airline,
+    AirportInfo Destination,
+    DateTimeOffset DepartsAt,
+    int SeatsLeft,
+    DepartureStatus Status);
+
+/// <summary>Rota com o preço mais baixo disponível em Economy.</summary>
+public sealed record RouteDeal(AirportInfo Origin, AirportInfo Destination, decimal MinPrice, int DurationMinutes);

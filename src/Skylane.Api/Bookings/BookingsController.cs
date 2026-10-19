@@ -1,10 +1,11 @@
 using Skylane.Api.Common;
+using Skylane.Api.Payments;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Skylane.Api.Bookings;
 
 [Route("api/bookings")]
-public sealed class BookingsController(BookingService bookings) : ApiControllerBase
+public sealed class BookingsController(BookingService bookings, BookingPaymentService payments) : ApiControllerBase
 {
     /// <summary>
     /// Cria uma reserva (só ida ou ida e volta) e prende os lugares escolhidos durante alguns minutos.
@@ -44,6 +45,23 @@ public sealed class BookingsController(BookingService bookings) : ApiControllerB
     public async Task<ActionResult<BookingResponse>> Confirm(string reference, CancellationToken ct)
     {
         var result = await bookings.ConfirmAsync(reference, ct);
+        return result.IsSuccess ? result.Value! : ToProblem(result.Error!);
+    }
+
+    /// <summary>
+    /// Paga a reserva com um cartão (prestador de pagamentos simulado) e, se for aprovado, confirma-a.
+    /// Cartões de teste: 4242 4242 4242 4242 (aprovado), 4000 0000 0000 0002 (recusado),
+    /// 4000 0000 0000 9995 (saldo insuficiente).
+    /// </summary>
+    [HttpPost("{reference}/pay")]
+    [ProducesResponseType<BookingResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status402PaymentRequired)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status410Gone)]
+    public async Task<ActionResult<BookingResponse>> Pay(string reference, PayBookingRequest request, CancellationToken ct)
+    {
+        var result = await payments.PayAsync(reference, request, ct);
         return result.IsSuccess ? result.Value! : ToProblem(result.Error!);
     }
 }

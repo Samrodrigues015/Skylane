@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Skylane.Api.Bookings;
 using Skylane.Api.Data;
 using Skylane.Api.Flights;
+using Skylane.Api.Payments;
 using Skylane.Api.Reservations;
 using Skylane.Api.Tickets;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,10 @@ builder.Services.AddScoped<FlightService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<BookingExpirer>();
 
+builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection(PaymentOptions.Section));
+builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
+builder.Services.AddScoped<BookingPaymentService>();
+
 builder.Services.AddHostedService<ReservationExpiryJob>();
 
 var app = builder.Build();
@@ -52,6 +57,11 @@ app.MapOpenApi();
 app.MapScalarApiReference();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).ExcludeFromDescription();
+
+// O front-end React é servido a partir do wwwroot (gerado pelo build do Skylane.Web).
+// Qualquer rota que não seja da API (ex.: /flights, /booking/K7M2Q9) devolve o index.html
+// e o React Router trata dela no browser.
+app.MapFallbackToFile("{*path:regex(^(?!api/).*$)}", "index.html");
 
 app.Run();
 

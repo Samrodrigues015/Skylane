@@ -1,6 +1,7 @@
 using Skylane.Api.Bookings;
 using Skylane.Api.Events;
 using Skylane.Api.Flights;
+using Skylane.Api.Payments;
 using Skylane.Api.Reservations;
 using Skylane.Api.Tickets;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ public sealed class SkylaneDbContext(DbContextOptions<SkylaneDbContext> options)
     public DbSet<FlightSeat> FlightSeats => Set<FlightSeat>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Passenger> Passengers => Set<Passenger>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

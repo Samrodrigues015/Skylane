@@ -41,6 +41,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
         builder.UseSetting("ConnectionStrings:Default", connectionString);
         builder.UseSetting("SeedDemoData", "false");
+        builder.UseSetting("Payments:SimulatedDelayMs", "0");
 
         // Os testes chamam o ReservationExpirer diretamente, para controlar quando corre.
         builder.UseSetting("Reservations:ExpiryJobEnabled", "false");
