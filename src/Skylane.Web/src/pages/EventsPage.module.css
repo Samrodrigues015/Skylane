@@ -352,3 +352,39 @@
   padding: 13px;
   font-size: 16px;
 }
+
+.added {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.added b {
+  display: block;
+  font: 700 20px var(--font-cond);
+}
+
+.added span {
+  color: var(--ink-2);
+}
+
+.addedIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: grid !important;
+  place-items: center;
+}
+
+.addedActions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}

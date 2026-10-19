@@ -110,11 +110,13 @@ export interface PassengerRequest {
   documentNumber: string;
 }
 
+/** O carrinho: voos, bilhetes para eventos ou os dois. */
 export interface CreateBookingRequest {
   contactEmail: string;
-  passengers: PassengerRequest[];
-  outbound: { flightId: string; seats: string[] };
+  passengers?: PassengerRequest[];
+  outbound?: { flightId: string; seats: string[] };
   return?: { flightId: string; seats: string[] };
+  events?: { eventId: string; quantity: number }[];
 }
 
 export interface CardPayment {

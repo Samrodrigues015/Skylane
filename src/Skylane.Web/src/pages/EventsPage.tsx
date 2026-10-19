@@ -1,18 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { QRCodeSVG } from "qrcode.react";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
-import type { CardPayment, EventResponse, ReservationResponse } from "../api/types";
-import CardForm from "../components/CardForm";
-import { AlertIcon, ClockIcon, LockIcon, MinusIcon, PlusIcon } from "../components/Icons";
+import type { EventResponse } from "../api/types";
+import { AlertIcon, ArrowRightIcon, CartIcon, CheckIcon, MinusIcon, PlusIcon } from "../components/Icons";
+import { MAX_TICKETS, useCart } from "../lib/cart";
 import { errorMessage } from "../lib/errors";
 import { clockTime, dayNumber, isoDate, longDate, money, monthShort } from "../lib/format";
-import { useCountdown } from "../lib/useCountdown";
 import styles from "./EventsPage.module.css";
 
-const MAX_TICKETS = 6;
 
 export default function EventsPage() {
   const { t } = useTranslation();
@@ -104,28 +101,12 @@ export default function EventsPage() {
 
 function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () => void }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const [quantity, setQuantity] = useState(1);
-  const [reservation, setReservation] = useState<ReservationResponse | null>(null);
-  const countdown = useCountdown(reservation?.status === "Pending" ? reservation.expiresAt : undefined);
-  const max = Math.min(MAX_TICKETS, event.available);
-
-  const refreshEvents = () => queryClient.invalidateQueries({ queryKey: ["events"] });
-
-  // 1.º passo: prender os lugares (como no avião, ficam guardados uns minutos).
-  const reserve = useMutation({
-    mutationFn: () => api.reserveEvent(event.id, quantity),
-    onSuccess: (r) => {
-      setReservation(r);
-      void refreshEvents();
-    },
-  });
-
-  // 2.º passo: pagar. Só depois do pagamento aprovado é que os bilhetes são emitidos.
-  const pay = useMutation({
-    mutationFn: (card: CardPayment) => api.payReservation(reservation!.id, card),
-    onSuccess: setReservation,
-  });
+  const navigate = useNavigate();
+  const cart = useCart();
+  const inCart = cart.items.find((i) => i.event.id === event.id)?.quantity ?? 0;
+  const max = Math.max(0, Math.min(MAX_TICKETS - inCart, event.available - inCart));
+  const [quantity, setQuantity] = useState(Math.min(1, max));
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -133,9 +114,10 @@ function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () =>
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const error = reserve.error ?? pay.error;
-  const expired = reservation?.status === "Expired" || countdown.expired;
-  const step = !reservation ? 1 : reservation.status === "Confirmed" ? 3 : 2;
+  const add = () => {
+    cart.add(event, quantity);
+    setAdded(true);
+  };
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -158,78 +140,45 @@ function TicketDialog({ event, onClose }: { event: EventResponse; onClose: () =>
           </button>
         </header>
 
-        <ol className={styles.progress} aria-label={t("events.steps")}>
-          {[t("events.stepTickets"), t("events.stepPayment"), t("events.stepDone")].map((label, i) => (
-            <li key={label} className={step === i + 1 ? styles.current : step > i + 1 ? styles.done : ""}>
-              {label}
-            </li>
-          ))}
-        </ol>
-
-        {error && (
-          <p className={styles.error} role="alert">
-            <AlertIcon /> {errorMessage(error, t)}
-          </p>
-        )}
-
-        {step === 1 && (
-          <div className={styles.step}>
-            <div>
-              <span className={styles.label}>{t("events.tickets")}</span>
-              <small className={styles.each}>{t("tripEvents.each", { price: money(event.price, event.currency) })}</small>
-            </div>
-            <div className={styles.stepper}>
-              <button type="button" aria-label="-" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)}>
-                <MinusIcon />
-              </button>
-              <b>{quantity}</b>
-              <button type="button" aria-label="+" disabled={quantity >= max} onClick={() => setQuantity(quantity + 1)}>
-                <PlusIcon />
-              </button>
-            </div>
-            <button type="button" className="btn btn-primary" disabled={reserve.isPending} onClick={() => reserve.mutate()}>
-              {t("events.toPayment", { amount: money(event.price * quantity, event.currency) })}
-            </button>
-          </div>
-        )}
-
-        {step === 2 && reservation && !expired && (
-          <div>
-            <div className={styles.payHead}>
-              <div className={styles.timer}>
-                <ClockIcon />
-                <span>{t("events.heldFor")}</span>
-                <b>{countdown.label}</b>
+        {!added ? (
+          <>
+            <div className={styles.step}>
+              <div>
+                <span className={styles.label}>{t("events.tickets")}</span>
+                <small className={styles.each}>{t("tripEvents.each", { price: money(event.price, event.currency) })}</small>
+                {inCart > 0 && <small className={styles.each}>{t("cart.inCart")}: {inCart}</small>}
               </div>
-              <span>
-                {t("tripEvents.tickets", { count: reservation.quantity })} ·{" "}
-                <b>{money(reservation.total, reservation.currency)}</b>
-              </span>
+              <div className={styles.stepper}>
+                <button type="button" aria-label="-" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)}>
+                  <MinusIcon />
+                </button>
+                <b>{quantity}</b>
+                <button type="button" aria-label="+" disabled={quantity >= max} onClick={() => setQuantity(quantity + 1)}>
+                  <PlusIcon />
+                </button>
+              </div>
+              <button type="button" className="btn btn-primary" disabled={max === 0} onClick={add}>
+                <CartIcon /> {t("events.addToCart", { amount: money(event.price * quantity, event.currency) })}
+              </button>
             </div>
-            <CardForm id="event-card-form" disabled={pay.isPending} onSubmit={(card) => pay.mutate(card)} />
-            <button type="submit" form="event-card-form" className={`btn btn-primary ${styles.payButton}`} disabled={pay.isPending}>
-              <LockIcon /> {pay.isPending ? t("payment.processing") : t("payment.pay", { amount: money(reservation.total, reservation.currency) })}
-            </button>
-          </div>
-        )}
-
-        {expired && (
-          <p className={styles.error} role="alert">
-            <AlertIcon /> {t("errors.reservation_expired")}
-          </p>
-        )}
-
-        {step === 3 && reservation && (
-          <div>
-            <h3 className={styles.ticketsTitle}>{t("events.yourTickets")}</h3>
-            <p className={styles.muted}>{t("events.showAtEntrance")}</p>
-            <div className={styles.tickets}>
-              {reservation.tickets.map((code) => (
-                <div key={code} className={styles.ticket}>
-                  <QRCodeSVG value={code} size={96} marginSize={0} />
-                  <code>{code}</code>
-                </div>
-              ))}
+            <p className={styles.muted}>{t("events.cartHint")}</p>
+          </>
+        ) : (
+          <div className={styles.added}>
+            <span className={styles.addedIcon}>
+              <CheckIcon />
+            </span>
+            <div>
+              <b>{t("cart.added")}</b>
+              <span>{t("cart.addedText", { count: quantity, name: event.name })}</span>
+            </div>
+            <div className={styles.addedActions}>
+              <button type="button" className="btn btn-ghost" onClick={onClose}>
+                {t("cart.keepBrowsing")}
+              </button>
+              <button type="button" className="btn btn-primary" onClick={() => navigate("/cart")}>
+                {t("cart.view")} <ArrowRightIcon />
+              </button>
             </div>
           </div>
         )}

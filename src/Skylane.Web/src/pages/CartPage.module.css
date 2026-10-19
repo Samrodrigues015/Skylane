@@ -1,0 +1,241 @@
+.items {
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto auto auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.date {
+  background: linear-gradient(160deg, #7a2459, #2a0f25);
+  color: #fff;
+  border-radius: 10px;
+  text-align: center;
+  padding: 7px 0;
+  line-height: 1;
+}
+
+.date b {
+  display: block;
+  font: 700 24px var(--font-cond);
+}
+
+.date small {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.info {
+  display: grid;
+  min-width: 0;
+}
+
+.info h3 {
+  margin: 0;
+  font: 600 19px var(--font-cond);
+}
+
+.info span {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.info .city {
+  color: var(--magenta);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+}
+
+.stepper b {
+  min-width: 16px;
+  text-align: center;
+  font: 700 18px var(--font-cond);
+}
+
+.price {
+  display: grid;
+  text-align: right;
+  min-width: 84px;
+}
+
+.price b {
+  font: 700 19px var(--font-cond);
+}
+
+.price small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.remove {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.remove:hover {
+  color: var(--red);
+}
+
+.flight {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  background: var(--blue-50);
+  border-color: #cfdcf7;
+}
+
+.flightIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.flight h2 {
+  margin: 0;
+  font: 600 22px var(--font-cond);
+}
+
+.flight p {
+  margin: 4px 0 12px;
+  color: var(--ink-2);
+}
+
+.flightButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.flightButtons button {
+  display: grid;
+  text-align: left;
+  gap: 1px;
+}
+
+.flightButtons small {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.summary {
+  display: grid;
+  gap: 12px;
+  position: sticky;
+  top: 16px;
+}
+
+.summary h2 {
+  margin: 0;
+  font: 600 16px var(--font);
+}
+
+.line,
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.line {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.total {
+  font-weight: 600;
+}
+
+.total b {
+  font: 700 28px var(--font-cond);
+}
+
+.empty {
+  max-width: 560px;
+  margin: 30px auto;
+  text-align: center;
+  padding: 36px;
+}
+
+.empty h1 {
+  font: 700 30px var(--font-cond);
+  margin: 0 0 6px;
+}
+
+.empty p {
+  color: var(--muted);
+}
+
+.empty div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .item {
+    grid-template-columns: 56px 1fr;
+  }
+
+  .stepper,
+  .price,
+  .remove {
+    grid-column: 2;
+  }
+
+  .price {
+    text-align: left;
+  }
+
+  .remove {
+    justify-self: start;
+  }
+
+  .summary {
+    position: static;
+  }
+}
+
+.invalid {
+  color: var(--red);
+}

@@ -41,12 +41,14 @@ export default function PaymentPage() {
   if (booking.status === "Confirmed") return <Navigate to={`/booking/${booking.reference}/confirmation`} replace />;
 
   const roundTrip = booking.legs.length > 1;
+  // Compra só de bilhetes para eventos: sem passos do voo nem sugestões de eventos no destino.
+  const hasFlights = booking.legs.length > 0;
   const expired = booking.status === "Expired" || countdown.expired;
 
   if (expired) {
     return (
       <main className="wrap page">
-        <Steps current="payment" roundTrip={roundTrip} />
+        {hasFlights && <Steps current="payment" roundTrip={roundTrip} />}
         <section className={`panel ${styles.expired}`}>
           <ClockIcon width={40} height={40} />
           <h1>{t("payment.expiredTitle")}</h1>
@@ -63,7 +65,7 @@ export default function PaymentPage() {
 
   return (
     <main className="wrap page">
-      <Steps current="payment" roundTrip={roundTrip} />
+      {hasFlights && <Steps current="payment" roundTrip={roundTrip} />}
 
       <div className={checkout.layout}>
         <div>
@@ -83,7 +85,7 @@ export default function PaymentPage() {
             </div>
           )}
 
-          <TripEvents booking={booking} onChange={(updated) => update({ booking: updated })} />
+          {hasFlights && <TripEvents booking={booking} onChange={(updated) => update({ booking: updated })} />}
 
           <section className={checkout.card}>
             <div className={checkout.cardHead}>

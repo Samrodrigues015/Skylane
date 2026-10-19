@@ -1,13 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import type { Language } from "../i18n";
-import { PlaneIcon } from "./Icons";
+import { useCart } from "../lib/cart";
+import { CartIcon, PlaneIcon } from "./Icons";
 import styles from "./Layout.module.css";
 
 export default function Layout() {
   const { t, i18n } = useTranslation();
   const setLanguage = (lng: Language) => void i18n.changeLanguage(lng);
   const { pathname } = useLocation();
+  const cart = useCart();
   // "Voos" fica ativo em todo o fluxo de compra, não só na página inicial.
   const inFlights = pathname === "/" || pathname.startsWith("/flights") || pathname.startsWith("/booking");
 
@@ -43,6 +45,10 @@ export default function Layout() {
                 </button>
               ))}
             </div>
+            <Link to="/cart" className={styles.cart} aria-label={t("cart.open", { count: cart.count })}>
+              <CartIcon />
+              {cart.count > 0 && <span className={styles.badge}>{cart.count}</span>}
+            </Link>
             <Link to="/manage" className={styles.manage}>
               {t("nav.manage")}
             </Link>

@@ -50,6 +50,7 @@ export default function ConfirmationPage() {
 
   const firstName = booking.passengers[0]?.split(" ")[0] ?? "";
   const outbound = booking.legs.find((l) => l.direction === "Outbound") ?? booking.legs[0];
+  const hasFlights = booking.legs.length > 0;
   const inbound = booking.legs.find((l) => l.direction === "Return");
 
   return (
@@ -59,8 +60,8 @@ export default function ConfirmationPage() {
           <CheckIcon width={28} height={28} />
         </span>
         <div>
-          <h1>{t("confirmation.title", { name: firstName })}</h1>
-          <p>{t("confirmation.lead", { email: booking.contactEmail })}</p>
+          <h1>{hasFlights ? t("confirmation.title", { name: firstName }) : t("confirmation.ticketsTitle")}</h1>
+          <p>{t(hasFlights ? "confirmation.lead" : "confirmation.ticketsLead", { email: booking.contactEmail })}</p>
         </div>
         <div className={styles.ref}>
           <small>{t("confirmation.reference")}</small>
@@ -70,10 +71,10 @@ export default function ConfirmationPage() {
 
       <div className={`${styles.actions} no-print`}>
         <button type="button" className="btn btn-blue" onClick={() => window.print()}>
-          <PrinterIcon /> {t("confirmation.print")}
+          <PrinterIcon /> {t(hasFlights ? "confirmation.print" : "confirmation.printTickets")}
         </button>
-        <Link to="/" className="btn btn-ghost">
-          {t("confirmation.newSearch")}
+        <Link to={hasFlights ? "/" : "/events"} className="btn btn-ghost">
+          {t(hasFlights ? "confirmation.newSearch" : "cart.seeEvents")}
         </Link>
       </div>
 
@@ -116,12 +117,14 @@ export default function ConfirmationPage() {
         </section>
       )}
 
-      <DestinationEvents
-        city={outbound.destination.code}
-        from={isoDate(outbound.arrivesAt)}
-        to={inbound ? isoDate(inbound.departsAt) : addDays(isoDate(outbound.arrivesAt), 7)}
-        exclude={booking.events.map((e) => e.eventId)}
-      />
+      {hasFlights && (
+        <DestinationEvents
+          city={outbound.destination.code}
+          from={isoDate(outbound.arrivesAt)}
+          to={inbound ? isoDate(inbound.departsAt) : addDays(isoDate(outbound.arrivesAt), 7)}
+          exclude={booking.events.map((e) => e.eventId)}
+        />
+      )}
     </main>
   );
 }

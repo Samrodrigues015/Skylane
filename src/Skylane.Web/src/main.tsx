@@ -5,7 +5,9 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import "./i18n";
 import "./styles/global.css";
 import Layout from "./components/Layout";
+import { CartProvider } from "./lib/cart";
 import { FlowProvider } from "./lib/flow";
+import CartPage from "./pages/CartPage";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import EventsPage from "./pages/EventsPage";
 import FlightsPage from "./pages/FlightsPage";
@@ -29,6 +31,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <FlowProvider>
+        <CartProvider>
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
@@ -40,10 +43,12 @@ createRoot(document.getElementById("root")!).render(
               <Route path="booking/:reference/confirmation" element={<ConfirmationPage />} />
               <Route path="manage" element={<ManageBookingPage />} />
               <Route path="events" element={<EventsPage />} />
+              <Route path="cart" element={<CartPage />} />
               <Route path="*" element={<HomePage />} />
             </Route>
           </Routes>
         </BrowserRouter>
+        </CartProvider>
       </FlowProvider>
     </QueryClientProvider>
   </StrictMode>,

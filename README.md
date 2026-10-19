@@ -141,11 +141,14 @@ Só se guardam os últimos 4 dígitos. Pagar uma reserva já confirmada devolve 
 
 Trocar por um gateway real seria implementar a mesma interface.
 
-### Eventos no carrinho da viagem
+### Carrinho: voos e eventos juntos
 
-No passo do pagamento, o site mostra os eventos no destino durante a estadia e deixa **juntá-los à viagem**. Os bilhetes ficam presos com o mesmo prazo que os lugares do avião, aparecem no resumo (com opção de retirar) e entram no total. Paga-se tudo de uma vez: o mesmo pagamento confirma os voos e emite os bilhetes, que aparecem com QR code junto aos cartões de embarque.
+Os bilhetes para eventos vão para um **carrinho** (no browser, como numa loja online: ainda não prendem lugares). No carrinho pode-se:
 
-Na página de Eventos também se compram bilhetes sem voo, com o mesmo fluxo: escolher a quantidade, lugares guardados durante 10 minutos, pagamento e bilhetes.
+- **Juntar um voo**: o site sugere voos para a cidade do evento, com chegada na véspera. Ao escolher os lugares do avião, o carrinho segue no mesmo pedido à API e é tudo reservado de uma vez **ou nada**: se um evento esgotar entretanto, nenhum lugar do avião fica preso.
+- **Pagar só os bilhetes**, sem voo.
+
+Em ambos os casos é criada uma única reserva com o mesmo prazo para tudo (15 minutos) e um único pagamento confirma os voos e emite os bilhetes, que aparecem com QR code junto aos cartões de embarque. No passo do pagamento ainda se podem juntar outros eventos no destino durante a estadia.
 
 ## Funcionalidades
 
@@ -201,7 +204,7 @@ Abre http://localhost:5173. O Vite reencaminha os pedidos `/api` para a API em h
 
 A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos das rotas principais para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.
 
-Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente também tem voos: são criados no momento da primeira pesquisa (ver *Voos criados a pedido* em baixo).
+Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente também tem voos: são criados no momento da primeira pesquisa (ver *Voos criados a pedido* mais acima).
 
 A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresher`) corre no arranque e de 6 em 6 horas e acrescenta os voos das rotas principais dos próximos 30 dias e as sessões dos eventos dos próximos 120 dias (cada evento repete-se a um ritmo fixo). Seja qual for o dia em que alguém abre o site, há voos e bilhetes à venda.
 
@@ -223,7 +226,7 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 | `GET` | `/api/flights/search?from=OPO&to=FNC&date=2026-11-20&passengers=2` | Voos diretos num dia, com preço e lugares livres por classe |
 | `GET` | `/api/flights/{id}/seats` | Mapa de lugares do voo |
 | `POST` | `/api/flights` | Cria um voo e todos os seus lugares |
-| `POST` | `/api/bookings` | Reserva lugares num voo, ou em dois (ida e volta) |
+| `POST` | `/api/bookings` | Cria a reserva do carrinho: voos (só ida ou ida e volta), bilhetes para eventos, ou os dois |
 | `GET` | `/api/bookings/{reference}` | Consulta uma reserva pela referência (ex.: `K7M2Q9`) |
 | `POST` | `/api/bookings/{reference}/events` | Junta bilhetes de um evento à viagem (`{ "eventId": "...", "quantity": 2 }`) |
 | `DELETE` | `/api/bookings/{reference}/events/{reservationId}` | Retira o evento da viagem e devolve os lugares |

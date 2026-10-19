@@ -18,7 +18,7 @@ export default function BookingSummary({ booking, onRemoveEvent, children }: Pro
   return (
     <aside className={`panel ${styles.summary}`}>
       <div className={styles.head}>
-        <h2>{t("summary.title")}</h2>
+        <h2>{booking.legs.length > 0 ? t("summary.title") : t("cart.orderTitle")}</h2>
         <span className={styles.ref}>
           {t("payment.reference")} <b>{booking.reference}</b>
         </span>
@@ -77,7 +77,9 @@ export default function BookingSummary({ booking, onRemoveEvent, children }: Pro
       )}
 
       <div className={styles.total}>
-        <span>{t("summary.totalFor", { count: booking.passengers.length })}</span>
+        <span>
+          {booking.passengers.length > 0 ? t("summary.totalFor", { count: booking.passengers.length }) : t("summary.total")}
+        </span>
         <b>{money(booking.total, booking.currency)}</b>
       </div>
 

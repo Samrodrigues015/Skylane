@@ -9,6 +9,7 @@ import SeatMap from "../components/SeatMap";
 import Steps from "../components/Steps";
 import TripSummary from "../components/TripSummary";
 import { errorMessage } from "../lib/errors";
+import { cartSelections, useCart } from "../lib/cart";
 import { useFlow } from "../lib/flow";
 import { shortDate, isoDate } from "../lib/format";
 import checkout from "./Checkout.module.css";
@@ -20,6 +21,7 @@ export default function SeatsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { state, update } = useFlow();
+  const cart = useCart();
   const { search, outbound, inbound, passengers } = state;
 
   const count = passengers.length;
@@ -46,9 +48,12 @@ export default function SeatsPage() {
         passengers,
         outbound: { flightId: outbound!.id, seats: seats.outbound },
         return: inbound ? { flightId: inbound.id, seats: seats.inbound } : undefined,
+        // Os bilhetes do carrinho vão no mesmo pedido: ou fica tudo reservado, ou nada.
+        events: cartSelections(cart.items),
       }),
     onSuccess: (booking) => {
       update({ booking, seats });
+      cart.clear();
       navigate("/booking/payment");
     },
     onError: (err) => {

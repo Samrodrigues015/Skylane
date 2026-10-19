@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { FlightSummary } from "../api/types";
+import { useCart } from "../lib/cart";
 import { fareFor, type SearchParams } from "../lib/flow";
 import { clockTime, money, shortDate } from "../lib/format";
 import { ClockIcon } from "./Icons";
@@ -20,7 +21,8 @@ export default function TripSummary({ search, outbound, inbound, children, showH
   const roundTrip = search.return !== undefined;
 
   const legTotal = (f?: FlightSummary) => (f ? fareFor(f, search.cabin).price * search.adults : 0);
-  const total = legTotal(outbound) + legTotal(inbound);
+  const cart = useCart();
+  const total = legTotal(outbound) + legTotal(inbound) + cart.total;
 
   return (
     <aside className={`panel ${styles.summary}`}>
@@ -35,6 +37,20 @@ export default function TripSummary({ search, outbound, inbound, children, showH
           cabin={t(`cabin.${search.cabin}`)}
           empty={t("summary.chooseReturn")}
         />
+      )}
+
+      {cart.items.length > 0 && (
+        <div className={styles.leg}>
+          <small>{t("cart.inCart")}</small>
+          {cart.items.map((i) => (
+            <span key={i.event.id} className={styles.cartLine}>
+              <span>
+                {i.quantity} × {i.event.name}
+              </span>
+              <span>{money(i.quantity * i.event.price, i.event.currency)}</span>
+            </span>
+          ))}
+        </div>
       )}
 
       <div className={styles.total}>

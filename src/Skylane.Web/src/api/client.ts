@@ -7,7 +7,6 @@ import type {
   EventResponse,
   FlightSummary,
   CardPayment,
-  ReservationResponse,
   RouteDeal,
   SeatMapResponse,
 } from "./types";
@@ -80,10 +79,6 @@ export const api = {
     const query = q.toString();
     return request<EventResponse[]>(`/api/events${query ? `?${query}` : ""}`);
   },
-  reserveEvent: (eventId: string, quantity: number) =>
-    post<ReservationResponse>(`/api/events/${eventId}/reservations`, { quantity }),
-  payReservation: (reservationId: string, card: CardPayment) =>
-    post<ReservationResponse>(`/api/reservations/${reservationId}/pay`, card),
   addBookingEvent: (reference: string, eventId: string, quantity: number) =>
     post<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/events`, { eventId, quantity }),
   removeBookingEvent: (reference: string, reservationId: string) =>
