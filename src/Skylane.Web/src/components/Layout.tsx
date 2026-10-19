@@ -1,4 +1,6 @@
+import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
+import { slowNetwork } from "../api/client";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import type { Language } from "../i18n";
 import { useCart } from "../lib/cart";
@@ -10,6 +12,7 @@ export default function Layout() {
   const setLanguage = (lng: Language) => void i18n.changeLanguage(lng);
   const { pathname } = useLocation();
   const cart = useCart();
+  const waking = useSyncExternalStore(slowNetwork.subscribe, slowNetwork.isSlow);
   // "Voos" fica ativo em todo o fluxo de compra, não só na página inicial.
   const inFlights = pathname === "/" || pathname.startsWith("/flights") || pathname.startsWith("/booking");
 
@@ -55,6 +58,15 @@ export default function Layout() {
           </div>
         </div>
       </header>
+
+      {waking && (
+        <div className={`${styles.waking} no-print`} role="status">
+          <span className={styles.spinner} aria-hidden="true" />
+          <span>
+            <b>{t("waking.title")}</b> {t("waking.text")}
+          </span>
+        </div>
+      )}
 
       <Outlet />
 

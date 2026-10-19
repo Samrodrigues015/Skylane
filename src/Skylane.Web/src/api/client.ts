@@ -27,7 +27,43 @@ export class ApiError extends Error {
   }
 }
 
+/*
+ * Pedidos lentos. Na demo publicada, a API e a base de dados desligam-se quando ninguém as usa;
+ * a primeira visita a seguir pode demorar até um minuto. Se um pedido passar de 4 segundos,
+ * o Layout mostra "A acordar o servidor…" para não parecer que o site está avariado.
+ */
+let slowRequests = 0;
+const slowListeners = new Set<() => void>();
+const notifySlow = () => slowListeners.forEach((listener) => listener());
+
+export const slowNetwork = {
+  subscribe(listener: () => void) {
+    slowListeners.add(listener);
+    return () => slowListeners.delete(listener);
+  },
+  isSlow: () => slowRequests > 0,
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let slow = false;
+  const timer = window.setTimeout(() => {
+    slow = true;
+    slowRequests++;
+    notifySlow();
+  }, 4000);
+
+  try {
+    return await send<T>(path, init);
+  } finally {
+    window.clearTimeout(timer);
+    if (slow) {
+      slowRequests--;
+      notifySlow();
+    }
+  }
+}
+
+async function send<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
 
   try {

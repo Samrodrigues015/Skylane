@@ -51,6 +51,7 @@ var app = builder.Build();
 await DatabaseSetup.InitializeAsync(app);
 
 app.UseExceptionHandler();
+app.UseMiddleware<DatabaseWakeUp>();
 app.UseStatusCodePages();
 
 app.UseDefaultFiles();

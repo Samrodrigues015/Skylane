@@ -286,6 +286,10 @@ const pt = {
     Flowers: { name: "Flores", aboutTitle: "Sobre as mostras de flores", about: "Produtores locais mostram as suas flores em arranjos e tapetes feitos para a ocasião. É também uma oportunidade para comprar plantas da região." },
     Fireworks: { name: "Fogo de artifício", aboutTitle: "Sobre o fogo de artifício", about: "Espetáculos de fogo de artifício lançados muitas vezes sobre a água, para se verem de vários pontos da cidade. Convém chegar cedo para ficar num bom lugar." },
   },
+  waking: {
+    title: "A acordar o servidor…",
+    text: "A demo desliga-se quando ninguém a usa; a primeira visita pode demorar até um minuto.",
+  },
   common: {
     loading: "A carregar…",
     retry: "Tentar outra vez",

@@ -19,7 +19,21 @@ public static class DatabaseSetup
         var db = scope.ServiceProvider.GetRequiredService<SkylaneDbContext>();
         var time = scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
-        await db.Database.EnsureCreatedAsync();
+        // Na demo publicada a base de dados pode estar em pausa (Azure SQL serverless) e demorar
+        // até um minuto a acordar: tentamos durante dois minutos antes de desistir.
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await db.Database.EnsureCreatedAsync();
+                DatabaseWakeUp.MarkAwake();
+                break;
+            }
+            catch (Microsoft.Data.SqlClient.SqlException) when (attempt < 40)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(3));
+            }
+        }
 
         if (!app.Configuration.GetValue<bool>("SeedDemoData"))
         {

@@ -288,6 +288,10 @@ const en: Messages = {
     Flowers: { name: "Flowers", aboutTitle: "About flower shows", about: "Local growers show their flowers in arrangements and carpets made for the occasion. It's also a chance to buy plants from the region." },
     Fireworks: { name: "Fireworks", aboutTitle: "About fireworks", about: "Fireworks shows, often launched over the water so they can be seen from all around the city. Arrive early to get a good spot." },
   },
+  waking: {
+    title: "Waking up the server…",
+    text: "The demo sleeps when nobody is using it; the first visit can take up to a minute.",
+  },
   common: {
     loading: "Loading…",
     retry: "Try again",

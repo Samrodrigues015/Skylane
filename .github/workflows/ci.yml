@@ -53,12 +53,31 @@ jobs:
       - name: Type check and build
         run: npm run build
 
+  # Constrói a imagem Docker e, nos pushes para main, publica-a no GitHub Container Registry
+  # (ghcr.io). É essa imagem que corre na demo publicada no Azure Container Apps.
   docker:
     runs-on: ubuntu-latest
     needs: [build-and-test, web]
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: docker build -t skylane:ci .
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          tags: |
+            ghcr.io/samrodrigues015/skylane:latest
+            ghcr.io/samrodrigues015/skylane:${{ github.sha }}
