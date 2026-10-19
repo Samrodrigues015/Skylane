@@ -1,4 +1,6 @@
+using Bilheteira.Api.Bookings;
 using Bilheteira.Api.Events;
+using Bilheteira.Api.Flights;
 using Bilheteira.Api.Reservations;
 using Bilheteira.Api.Tickets;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,14 @@ public sealed class BilheteiraDbContext(DbContextOptions<BilheteiraDbContext> op
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Reservation> Reservations => Set<Reservation>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
+
+    public DbSet<Airport> Airports => Set<Airport>();
+    public DbSet<Airline> Airlines => Set<Airline>();
+    public DbSet<Flight> Flights => Set<Flight>();
+    public DbSet<FlightFare> FlightFares => Set<FlightFare>();
+    public DbSet<FlightSeat> FlightSeats => Set<FlightSeat>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Passenger> Passengers => Set<Passenger>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,5 +63,7 @@ public sealed class BilheteiraDbContext(DbContextOptions<BilheteiraDbContext> op
             t.Property(x => x.Code).HasMaxLength(16);
             t.HasIndex(x => x.Code).IsUnique();
         });
+
+        FlightsModel.Configure(modelBuilder);
     }
 }

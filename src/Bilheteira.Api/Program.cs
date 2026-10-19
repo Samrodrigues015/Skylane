@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
+using Bilheteira.Api.Bookings;
 using Bilheteira.Api.Data;
+using Bilheteira.Api.Flights;
 using Bilheteira.Api.Reservations;
 using Bilheteira.Api.Tickets;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,12 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<ReservationExpirer>();
 builder.Services.AddScoped<TicketService>();
+
+builder.Services.Configure<BookingOptions>(builder.Configuration.GetSection(BookingOptions.Section));
+builder.Services.AddScoped<FlightService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<BookingExpirer>();
+
 builder.Services.AddHostedService<ReservationExpiryJob>();
 
 var app = builder.Build();

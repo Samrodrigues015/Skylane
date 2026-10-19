@@ -1,4 +1,5 @@
 using Bilheteira.Api.Events;
+using Bilheteira.Api.Flights;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bilheteira.Api.Data;
@@ -6,7 +7,7 @@ namespace Bilheteira.Api.Data;
 public static class DatabaseSetup
 {
     /// <summary>
-    /// Cria a base de dados se não existir e, se configurado, carrega eventos de demonstração.
+    /// Cria a base de dados se não existir e, se configurado, carrega eventos e voos de demonstração.
     /// </summary>
     /// <remarks>
     /// EnsureCreated é suficiente para um projeto de demonstração. Num sistema em produção
@@ -20,7 +21,14 @@ public static class DatabaseSetup
 
         await db.Database.EnsureCreatedAsync();
 
-        if (app.Configuration.GetValue<bool>("SeedDemoData") && !await db.Events.AnyAsync())
+        if (!app.Configuration.GetValue<bool>("SeedDemoData"))
+        {
+            return;
+        }
+
+        await FlightSeeder.SeedAsync(db, time);
+
+        if (!await db.Events.AnyAsync())
         {
             var today = time.GetUtcNow().Date;
 

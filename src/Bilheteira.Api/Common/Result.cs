@@ -29,6 +29,12 @@ public sealed class Result<T>
     public Error? Error { get; }
     public bool IsSuccess => Error is null;
 
+    /// <summary>
+    /// Sucesso explícito. Necessário quando T é uma interface (ex.: IReadOnlyList),
+    /// porque o C# não aplica conversões implícitas definidas pelo utilizador a partir de interfaces.
+    /// </summary>
+    public static Result<T> Success(T value) => new(value, null);
+
     public static implicit operator Result<T>(T value) => new(value, null);
     public static implicit operator Result<T>(Error error) => new(default, error);
 }

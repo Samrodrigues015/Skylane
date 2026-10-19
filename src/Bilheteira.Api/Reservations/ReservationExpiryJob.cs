@@ -1,9 +1,11 @@
+using Bilheteira.Api.Bookings;
 using Microsoft.Extensions.Options;
 
 namespace Bilheteira.Api.Reservations;
 
 /// <summary>
-/// Serviço em segundo plano que, periodicamente, liberta os lugares das reservas expiradas.
+/// Serviço em segundo plano que, periodicamente, liberta os lugares das reservas expiradas
+/// (de eventos e de voos).
 /// </summary>
 public sealed class ReservationExpiryJob(
     IServiceScopeFactory scopeFactory,
@@ -26,13 +28,20 @@ public sealed class ReservationExpiryJob(
             {
                 // O DbContext é "scoped": criamos um scope novo em cada ciclo.
                 using var scope = scopeFactory.CreateScope();
-                var expirer = scope.ServiceProvider.GetRequiredService<ReservationExpirer>();
 
-                var expired = await expirer.ExpireDueAsync(stoppingToken);
+                var expiredReservations = await scope.ServiceProvider
+                    .GetRequiredService<ReservationExpirer>()
+                    .ExpireDueAsync(stoppingToken);
 
-                if (expired > 0)
+                var expiredBookings = await scope.ServiceProvider
+                    .GetRequiredService<BookingExpirer>()
+                    .ExpireDueAsync(stoppingToken);
+
+                if (expiredReservations + expiredBookings > 0)
                 {
-                    logger.LogInformation("{Count} reserva(s) expirada(s); lugares libertados.", expired);
+                    logger.LogInformation(
+                        "Expiradas: {Reservations} reserva(s) de eventos e {Bookings} reserva(s) de voos; lugares libertados.",
+                        expiredReservations, expiredBookings);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
