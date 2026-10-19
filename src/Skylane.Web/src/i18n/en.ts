@@ -257,7 +257,7 @@ const en: Messages = {
     remove: "Remove",
     subtotal: "Tickets",
     addFlightTitle: "Need a flight?",
-    addFlightText: "Find a flight to the event's city. Your tickets stay in the cart and you pay for everything at once.",
+    addFlightText: "Find a flight to the event's city.",
     flightsTo: "Flights to {{city}}",
     around: "{{from}} to {{to}}",
     ticketsOnly: "Pay for tickets only",

@@ -255,7 +255,7 @@ const pt = {
     remove: "Retirar",
     subtotal: "Bilhetes",
     addFlightTitle: "Vais precisar de voo?",
-    addFlightText: "Procura um voo para a cidade do evento. Os bilhetes ficam no carrinho e pagas tudo de uma vez.",
+    addFlightText: "Procura um voo para a cidade do evento.",
     flightsTo: "Voos para {{city}}",
     around: "{{from}} a {{to}}",
     ticketsOnly: "Pagar só os bilhetes",
