@@ -13,4 +13,13 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.*" />
   </ItemGroup>
 
+  <!--
+    O wwwroot é gerado pelo build do front-end (src/Skylane.Web) e não está no git.
+    Sem a pasta, o ASP.NET Core em Development lança DirectoryNotFoundException ao arrancar,
+    por isso criamo-la vazia antes de cada build.
+  -->
+  <Target Name="EnsureWebRoot" BeforeTargets="BeforeBuild">
+    <MakeDir Directories="$(MSBuildProjectDirectory)/wwwroot" />
+  </Target>
+
 </Project>
