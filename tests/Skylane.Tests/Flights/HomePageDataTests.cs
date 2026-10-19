@@ -38,8 +38,9 @@ public sealed class HomePageDataTests(ApiFactory factory)
 
         var departures = await _client.GetFromJsonAsync<List<DepartureInfo>>(
             "/api/airports/BCN/departures?limit=10", ApiClientExtensions.Json);
+        Assert.NotNull(departures);
 
-        var ids = departures!.Select(d => d.FlightId).ToList();
+        var ids = departures.Select(d => d.FlightId).ToList();
         Assert.True(ids.IndexOf(sooner.Id) < ids.IndexOf(later.Id));
         Assert.All(departures, d => Assert.Equal(DepartureStatus.OnTime, d.Status));
     }
@@ -59,7 +60,8 @@ public sealed class HomePageDataTests(ApiFactory factory)
 
         var deals = await _client.GetFromJsonAsync<List<RouteDeal>>("/api/flights/deals?limit=4", ApiClientExtensions.Json);
 
-        Assert.NotEmpty(deals!);
+        Assert.NotNull(deals);
+        Assert.NotEmpty(deals);
         Assert.Equal(deals.OrderBy(d => d.MinPrice).Select(d => d.MinPrice), deals.Select(d => d.MinPrice));
 
         var cheapest = deals[0];

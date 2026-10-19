@@ -17,7 +17,10 @@ public sealed class AirportsController(SkylaneDbContext db, FlightService flight
         string code, CancellationToken ct, [FromQuery] int limit = 6)
     {
         var departures = await flights.GetDeparturesAsync(code, limit, ct);
-        return departures is null ? ToProblem(Errors.AirportNotFound(code)) : Ok(departures);
+        // Aqui o aeroporto faz parte do URL, por isso não existir é 404 (na pesquisa é um parâmetro inválido: 400).
+        return departures is null
+            ? ToProblem(Errors.AirportNotFound(code) with { Type = ErrorType.NotFound })
+            : Ok(departures);
     }
 
     /// <summary>Lista os aeroportos, para preencher os campos de origem e destino.</summary>
