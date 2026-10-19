@@ -33,6 +33,7 @@ builder.Services.AddScoped<ReservationExpirer>();
 builder.Services.AddScoped<TicketService>();
 
 builder.Services.Configure<BookingOptions>(builder.Configuration.GetSection(BookingOptions.Section));
+builder.Services.AddScoped<FlightSchedule>();
 builder.Services.AddScoped<FlightService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<BookingExpirer>();

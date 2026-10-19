@@ -98,6 +98,7 @@ erDiagram
 Decisões que vale a pena destacar:
 
 - **Chave primária composta `(FlightId, SeatNumber)` em `FlightSeats`.** Sendo clustered, os lugares de um voo ficam juntos no disco, e o mapa do avião lê só essa zona da tabela.
+- **Voos criados a pedido.** Ter voos para as 110 combinações de aeroportos durante um ano seriam ~80 000 voos e 14 milhões de lugares. Em vez disso, quando alguém pesquisa uma rota e um dia sem voos, o `FlightSchedule` cria-os nesse momento a partir de um horário determinístico (`FlightTimetable`): o mesmo dia gera sempre as mesmas horas e preços, e a duração das rotas novas é estimada pela distância entre aeroportos. Duas pesquisas simultâneas não criam voos repetidos, graças a um `sp_getapplock` por rota.
 - **Lugares criados com um único `INSERT ... SELECT ... CROSS JOIN`.** 30 dias de voos são ~270 000 lugares; o EF objeto a objeto demoraria minutos, um só comando SQL demora segundos.
 - **Ordem fixa ao prender lugares.** Se uma reserva pede `[16A, 16B]` e outra `[16B, 16A]` ao mesmo tempo, cada uma podia ficar com um lugar à espera do outro (deadlock). Os lugares são sempre presos pela mesma ordem, e um teste com 30 pedidos cruzados confirma que não há deadlocks.
 - **Constraints que protegem os dados mesmo com bugs no código**: um lugar livre não pode ter dono (`CK_FlightSeats_OwnerMatchesStatus`); um passageiro não pode ter dois lugares no mesmo voo (índice único **filtrado** `WHERE PassengerId IS NOT NULL`); a chegada tem de ser depois da partida.
@@ -189,7 +190,9 @@ npm run dev
 
 Abre http://localhost:5173. O Vite reencaminha os pedidos `/api` para a API em http://localhost:5080.
 
-A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.
+A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos das rotas principais para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.
+
+Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente também tem voos: são criados no momento da primeira pesquisa (ver *Voos criados a pedido* em baixo).
 
 > Se já tinhas a base de dados de uma versão anterior, apaga-a com `docker compose down` antes de arrancar: o `EnsureCreated` só cria tabelas numa base de dados nova.
 

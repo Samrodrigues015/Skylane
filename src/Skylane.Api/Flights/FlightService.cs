@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Skylane.Api.Flights;
 
-public sealed class FlightService(SkylaneDbContext db, TimeProvider time)
+public sealed class FlightService(SkylaneDbContext db, TimeProvider time, FlightSchedule schedule)
 {
     public const int MaxPassengersPerSearch = 9;
 
@@ -39,6 +39,8 @@ public sealed class FlightService(SkylaneDbContext db, TimeProvider time)
         {
             return Errors.AirportNotFound(to);
         }
+
+        await schedule.EnsureFlightsAsync(from, to, date, days: 1, ct);
 
         // "Dia 20 no Porto" vai da meia-noite de dia 20 à meia-noite de dia 21, hora de Lisboa.
         // Convertemos esses dois limites para UTC, porque é assim que as partidas estão guardadas.
@@ -90,6 +92,8 @@ public sealed class FlightService(SkylaneDbContext db, TimeProvider time)
         }
 
         days = Math.Clamp(days, 1, 14);
+        await schedule.EnsureFlightsAsync(from, to, start, days, ct);
+
         var rangeStart = AirportTime.FromLocal(start.ToDateTime(TimeOnly.MinValue), origin.TimeZoneId);
         var rangeEnd = AirportTime.FromLocal(start.AddDays(days).ToDateTime(TimeOnly.MinValue), origin.TimeZoneId);
         var now = time.GetUtcNow();
