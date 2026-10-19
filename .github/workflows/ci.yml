@@ -23,8 +23,12 @@ jobs:
         run: dotnet build Skylane.slnx --no-restore --configuration Release
 
       # Os testes de integração usam Testcontainers: o runner do GitHub já tem Docker.
+      # O logger GitHubActions mostra os testes que falham como anotações no commit.
       - name: Test
-        run: dotnet test Skylane.slnx --no-build --configuration Release --logger "console;verbosity=normal"
+        run: >-
+          dotnet test Skylane.slnx --no-build --configuration Release
+          --logger "console;verbosity=normal"
+          --logger "GitHubActions;summary-include-passed=false"
 
   web:
     runs-on: ubuntu-latest
