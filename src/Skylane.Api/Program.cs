@@ -40,9 +40,11 @@ builder.Services.AddScoped<BookingExpirer>();
 
 builder.Services.Configure<PaymentOptions>(builder.Configuration.GetSection(PaymentOptions.Section));
 builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
-builder.Services.AddScoped<BookingPaymentService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<BookingEventsService>();
 
 builder.Services.AddHostedService<ReservationExpiryJob>();
+builder.Services.AddHostedService<DemoDataRefresher>();
 
 var app = builder.Build();
 

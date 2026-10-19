@@ -1,5 +1,6 @@
 using Skylane.Api.Common;
 using Skylane.Api.Data;
+using Skylane.Api.Flights;
 using Skylane.Api.Tickets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -22,7 +23,10 @@ public sealed class ReservationService(
 {
     private readonly ReservationOptions _options = options.Value;
 
-    public async Task<Result<ReservationResponse>> CreateAsync(Guid eventId, int quantity, CancellationToken ct)
+    /// <param name="bookingId">Se os bilhetes vão juntos com uma viagem: a reserva de voos.</param>
+    /// <param name="expiresAt">Prazo da reserva; por omissão, agora + HoldMinutes.</param>
+    public async Task<Result<ReservationResponse>> CreateAsync(
+        Guid eventId, int quantity, CancellationToken ct, Guid? bookingId = null, DateTimeOffset? expiresAt = null)
     {
         if (quantity < 1 || quantity > _options.MaxTicketsPerReservation)
         {
@@ -47,14 +51,18 @@ public sealed class ReservationService(
         }
 
         var now = time.GetUtcNow();
+        var price = await db.Events.Where(e => e.Id == eventId).Select(e => e.Price).SingleAsync(ct);
+
         var reservation = new Reservation
         {
             Id = Guid.CreateVersion7(),
             EventId = eventId,
             Quantity = quantity,
+            UnitPrice = price,
+            BookingId = bookingId,
             Status = ReservationStatus.Pending,
             CreatedAt = now,
-            ExpiresAt = now.AddMinutes(_options.HoldMinutes)
+            ExpiresAt = expiresAt ?? now.AddMinutes(_options.HoldMinutes)
         };
 
         db.Reservations.Add(reservation);
@@ -117,6 +125,35 @@ public sealed class ReservationService(
         };
     }
 
+    /// <summary>
+    /// Tira do carrinho uma reserva ainda por pagar e devolve os lugares ao evento.
+    /// Só funciona dentro da viagem a que pertence (<paramref name="bookingId"/>).
+    /// </summary>
+    public async Task<bool> CancelAsync(Guid reservationId, Guid bookingId, CancellationToken ct)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        // Condicional, como na expiração: se já foi paga ou expirou, não mexe em nada.
+        var cancelled = await db.Reservations
+            .Where(r => r.Id == reservationId && r.BookingId == bookingId && r.Status == ReservationStatus.Pending)
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.Status, ReservationStatus.Cancelled), ct);
+
+        if (cancelled == 1)
+        {
+            var reservation = await db.Reservations
+                .Where(r => r.Id == reservationId)
+                .Select(r => new { r.EventId, r.Quantity })
+                .SingleAsync(ct);
+
+            await db.Events
+                .Where(e => e.Id == reservation.EventId)
+                .ExecuteUpdateAsync(s => s.SetProperty(e => e.Reserved, e => e.Reserved - reservation.Quantity), ct);
+        }
+
+        await transaction.CommitAsync(ct);
+        return cancelled == 1;
+    }
+
     public async Task<ReservationResponse?> GetAsync(Guid reservationId, CancellationToken ct)
     {
         var row = await db.Reservations
@@ -127,9 +164,15 @@ public sealed class ReservationService(
                 r.Id,
                 r.EventId,
                 EventName = r.Event.Name,
+                r.Event.Venue,
+                r.Event.Airport.City,
+                r.Event.Airport.TimeZoneId,
+                r.Event.StartsAt,
                 r.Quantity,
+                r.UnitPrice,
                 r.Status,
                 r.ExpiresAt,
+                BookingReference = db.Bookings.Where(b => b.Id == r.BookingId).Select(b => b.Reference).FirstOrDefault(),
                 Tickets = r.Tickets.OrderBy(t => t.Code).Select(t => t.Code).ToList()
             })
             .FirstOrDefaultAsync(ct);
@@ -146,6 +189,9 @@ public sealed class ReservationService(
             : row.Status;
 
         return new ReservationResponse(
-            row.Id, row.EventId, row.EventName, row.Quantity, status, row.ExpiresAt, row.Tickets);
+            row.Id, row.EventId, row.EventName, row.Venue, row.City,
+            AirportTime.ToLocal(row.StartsAt, row.TimeZoneId),
+            row.Quantity, row.UnitPrice, row.UnitPrice * row.Quantity, "EUR",
+            status, row.ExpiresAt, row.BookingReference, row.Tickets);
     }
 }

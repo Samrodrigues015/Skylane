@@ -51,6 +51,15 @@ public static class Errors
     public static readonly Error BookingExpired =
         new(ErrorType.Gone, "booking_expired", "A reserva expirou e os lugares foram libertados.");
 
+    public static readonly Error BookingAlreadyPaid =
+        new(ErrorType.Conflict, "booking_already_paid", "Esta reserva já está paga e não pode ser alterada.");
+
+    public static readonly Error EventAlreadyInBooking =
+        new(ErrorType.Conflict, "event_already_in_booking", "Este evento já está na tua viagem.");
+
+    public static readonly Error ReservationPaidWithBooking =
+        new(ErrorType.Conflict, "reservation_paid_with_booking", "Estes bilhetes fazem parte de uma viagem: paga-se a reserva da viagem.");
+
     public static readonly Error SeatsMustMatchPassengers =
         new(ErrorType.Validation, "seats_must_match_passengers", "Escolhe um lugar por passageiro em cada voo.");
 

@@ -36,6 +36,7 @@ public sealed class SkylaneDbContext(DbContextOptions<SkylaneDbContext> options)
             e.Property(x => x.Name).HasMaxLength(120);
             e.Property(x => x.Venue).HasMaxLength(120);
             e.Property(x => x.AirportCode).HasMaxLength(3);
+            e.Property(x => x.Price).HasPrecision(10, 2);
             e.Ignore(x => x.Available);
             e.HasOne(x => x.Airport).WithMany().HasForeignKey(x => x.AirportCode).OnDelete(DeleteBehavior.Restrict);
 
@@ -50,6 +51,10 @@ public sealed class SkylaneDbContext(DbContextOptions<SkylaneDbContext> options)
                 "[Quantity] > 0"));
 
             r.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
+            r.Property(x => x.UnitPrice).HasPrecision(10, 2);
+
+            r.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Restrict);
+            r.HasIndex(x => x.BookingId);
 
             r.HasOne(x => x.Event)
                 .WithMany()

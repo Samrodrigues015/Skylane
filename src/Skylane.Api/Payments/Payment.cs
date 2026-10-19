@@ -16,7 +16,9 @@ public enum PaymentStatus
 public sealed class Payment
 {
     public Guid Id { get; init; }
-    public Guid BookingId { get; init; }
+    /// <summary>O que foi pago: uma reserva de voos (com os eventos juntos) ou só bilhetes de um evento.</summary>
+    public Guid? BookingId { get; init; }
+    public Guid? ReservationId { get; init; }
 
     public decimal Amount { get; init; }
     public required string Currency { get; init; }

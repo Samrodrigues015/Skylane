@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Skylane.Api.Flights;
+using Skylane.Api.Reservations;
 
 namespace Skylane.Api.Bookings;
 
@@ -48,6 +49,24 @@ public sealed record BookingLeg(
     DateTimeOffset ArrivesAt,
     IReadOnlyList<BookedSeat> Seats);
 
+/// <summary>Bilhetes de um evento juntos à viagem.</summary>
+/// <param name="StartsAt">Na hora local da cidade do evento.</param>
+public sealed record BookedEvent(
+    Guid ReservationId,
+    Guid EventId,
+    string Name,
+    string Venue,
+    string City,
+    DateTimeOffset StartsAt,
+    int Quantity,
+    decimal UnitPrice,
+    decimal Total,
+    ReservationStatus Status,
+    IReadOnlyList<string> Tickets);
+
+public sealed record AddEventRequest([Required] Guid? EventId, [Range(1, 10)] int Quantity);
+
+/// <param name="Total">Voos mais os eventos juntos à viagem.</param>
 public sealed record BookingResponse(
     string Reference,
     BookingStatus Status,
@@ -56,7 +75,8 @@ public sealed record BookingResponse(
     string Currency,
     DateTimeOffset ExpiresAt,
     IReadOnlyList<string> Passengers,
-    IReadOnlyList<BookingLeg> Legs);
+    IReadOnlyList<BookingLeg> Legs,
+    IReadOnlyList<BookedEvent> Events);
 
 public sealed class BookingOptions
 {

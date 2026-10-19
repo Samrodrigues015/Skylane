@@ -27,6 +27,6 @@ public static class DatabaseSetup
         }
 
         await FlightSeeder.SeedAsync(db, time);
-        await EventCatalog.SeedAsync(db, time);
+        await EventCatalog.EnsureUpcomingAsync(db, time);
     }
 }

@@ -76,6 +76,7 @@ public static class FlightClientExtensions
         return (await response.ReadAsync<BookingResponse>())!;
     }
 
+    /// <summary>Paga a reserva com o cartão de teste que é sempre aprovado.</summary>
     public static Task<HttpResponseMessage> ConfirmBookingAsync(this HttpClient client, string reference) =>
-        client.PostAsync($"/api/bookings/{reference}/confirm", content: null);
+        client.PostAsJsonAsync($"/api/bookings/{reference}/pay", ApiClientExtensions.TestCard, ApiClientExtensions.Json);
 }

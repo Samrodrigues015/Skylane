@@ -45,7 +45,7 @@ public sealed class EventsByCityTests(ApiFactory factory)
     [Fact]
     public async Task Evento_num_aeroporto_inexistente_e_recusado()
     {
-        var request = new CreateEventRequest("Evento", "Sala", DateTimeOffset.UtcNow.AddDays(5), 10, "XYZ");
+        var request = new CreateEventRequest("Evento", "Sala", DateTimeOffset.UtcNow.AddDays(5), 10, "XYZ", 20m);
 
         var response = await _client.PostAsJsonAsync("/api/events", request, ApiClientExtensions.Json);
 
@@ -58,7 +58,7 @@ public sealed class EventsByCityTests(ApiFactory factory)
         var startsAt = AirportTime.FromLocal(day.ToDateTime(new TimeOnly(hour, 0)), timeZone);
 
         var response = await _client.PostAsJsonAsync("/api/events",
-            new CreateEventRequest($"Evento {Guid.NewGuid():N}", "Sala", startsAt, 50, airport), ApiClientExtensions.Json);
+            new CreateEventRequest($"Evento {Guid.NewGuid():N}", "Sala", startsAt, 50, airport, 20m), ApiClientExtensions.Json);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<EventResponse>(ApiClientExtensions.Json))!;
     }

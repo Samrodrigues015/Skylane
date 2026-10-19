@@ -1,6 +1,7 @@
 using Skylane.Api.Bookings;
 using Skylane.Api.Flights;
 using Skylane.Api.Payments;
+using Skylane.Api.Reservations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Skylane.Api.Data;
@@ -116,7 +117,11 @@ public static class FlightsModel
 
         modelBuilder.Entity<Payment>(p =>
         {
-            p.ToTable("Payments", t => t.HasCheckConstraint("CK_Payments_AmountPositive", "[Amount] > 0"));
+            p.ToTable("Payments", t =>
+            {
+                t.HasCheckConstraint("CK_Payments_AmountPositive", "[Amount] > 0");
+                t.HasCheckConstraint("CK_Payments_OneTarget", "([BookingId] IS NULL AND [ReservationId] IS NOT NULL) OR ([BookingId] IS NOT NULL AND [ReservationId] IS NULL)");
+            });
             p.Property(x => x.Amount).HasPrecision(10, 2);
             p.Property(x => x.Currency).HasMaxLength(3);
             p.Property(x => x.Status).HasConversion<string>().HasMaxLength(16);
@@ -126,6 +131,8 @@ public static class FlightsModel
 
             p.HasOne<Booking>().WithMany().HasForeignKey(x => x.BookingId).OnDelete(DeleteBehavior.Cascade);
             p.HasIndex(x => x.BookingId);
+            p.HasOne<Reservation>().WithMany().HasForeignKey(x => x.ReservationId).OnDelete(DeleteBehavior.Restrict);
+            p.HasIndex(x => x.ReservationId);
         });
 
         modelBuilder.Entity<Passenger>(p =>

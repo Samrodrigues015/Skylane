@@ -1,6 +1,7 @@
 using Skylane.Api.Common;
 using Skylane.Api.Data;
 using Skylane.Api.Flights;
+using Skylane.Api.Reservations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -333,15 +334,45 @@ public sealed class BookingService(
             ? BookingStatus.Expired
             : booking.Status;
 
+        // Eventos juntos à viagem (os retirados do carrinho ou expirados já não contam).
+        var eventRows = await db.Reservations
+            .AsNoTracking()
+            .Where(r => r.BookingId == booking.Id &&
+                        (r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Confirmed))
+            .OrderBy(r => r.Event.StartsAt)
+            .Select(r => new
+            {
+                r.Id,
+                r.EventId,
+                r.Event.Name,
+                r.Event.Venue,
+                r.Event.Airport.City,
+                r.Event.Airport.TimeZoneId,
+                r.Event.StartsAt,
+                r.Quantity,
+                r.UnitPrice,
+                r.Status,
+                Tickets = r.Tickets.OrderBy(t => t.Code).Select(t => t.Code).ToList()
+            })
+            .ToListAsync(ct);
+
+        var events = eventRows
+            .Select(r => new BookedEvent(
+                r.Id, r.EventId, r.Name, r.Venue, r.City,
+                AirportTime.ToLocal(r.StartsAt, r.TimeZoneId),
+                r.Quantity, r.UnitPrice, r.UnitPrice * r.Quantity, r.Status, r.Tickets))
+            .ToList();
+
         return new BookingResponse(
             booking.Reference,
             status,
             booking.ContactEmail,
-            booking.Total,
+            booking.Total + events.Sum(e => e.Total),
             booking.Currency,
             booking.ExpiresAt,
             booking.Passengers,
-            legs);
+            legs,
+            events);
     }
 
     private static Leg ToLeg(LegDirection direction, FlightSelection selection) => new(

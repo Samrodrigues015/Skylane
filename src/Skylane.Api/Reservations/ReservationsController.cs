@@ -1,10 +1,11 @@
 using Skylane.Api.Common;
+using Skylane.Api.Payments;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Skylane.Api.Reservations;
 
 [Route("api/reservations")]
-public sealed class ReservationsController(ReservationService reservations) : ApiControllerBase
+public sealed class ReservationsController(ReservationService reservations, PaymentService payments) : ApiControllerBase
 {
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ReservationResponse>(StatusCodes.Status200OK)]
@@ -15,16 +16,17 @@ public sealed class ReservationsController(ReservationService reservations) : Ap
         return reservation is null ? ToProblem(Errors.ReservationNotFound) : reservation;
     }
 
-    /// <summary>
-    /// Confirma a compra e emite os bilhetes. Pode ser repetido sem efeitos duplicados.
-    /// </summary>
-    [HttpPost("{id:guid}/confirm")]
+    /// <summary>Paga os bilhetes (cartão fictício) e emite-os.</summary>
+    [HttpPost("{id:guid}/pay")]
     [ProducesResponseType<ReservationResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status402PaymentRequired)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status410Gone)]
-    public async Task<ActionResult<ReservationResponse>> Confirm(Guid id, CancellationToken ct)
+    public async Task<ActionResult<ReservationResponse>> Pay(Guid id, CardPaymentRequest request, CancellationToken ct)
     {
-        var result = await reservations.ConfirmAsync(id, ct);
+        var result = await payments.PayReservationAsync(id, request, ct);
         return result.IsSuccess ? result.Value! : ToProblem(result.Error!);
     }
 }

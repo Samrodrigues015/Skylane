@@ -102,6 +102,6 @@ public sealed class PaymentTests(ApiFactory factory)
     private Task<HttpResponseMessage> PayAsync(string reference, string card, string expiry = "12/40") =>
         _client.PostAsJsonAsync(
             $"/api/bookings/{reference}/pay",
-            new PayBookingRequest(card, "Samara Rodrigues", expiry, "123"),
+            new CardPaymentRequest(card, "Samara Rodrigues", expiry, "123"),
             ApiClientExtensions.Json);
 }

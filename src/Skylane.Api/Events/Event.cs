@@ -18,6 +18,9 @@ public sealed class Event
     public DateTimeOffset StartsAt { get; set; }
 
     /// <summary>Lotação total do evento.</summary>
+    /// <summary>Preço de cada bilhete, em euros.</summary>
+    public decimal Price { get; set; }
+
     public int Capacity { get; set; }
 
     /// <summary>

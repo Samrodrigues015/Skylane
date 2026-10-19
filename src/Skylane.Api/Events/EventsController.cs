@@ -94,7 +94,8 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
             Venue = request.Venue.Trim(),
             AirportCode = code,
             StartsAt = request.StartsAt!.Value.ToUniversalTime(),
-            Capacity = request.Capacity
+            Capacity = request.Capacity,
+            Price = request.Price
         };
 
         db.Events.Add(ev);
@@ -124,5 +125,5 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
     private static EventResponse ToResponse(Event e, string city, string timeZoneId) => new(
         e.Id, e.Name, e.Venue, e.AirportCode, city,
         AirportTime.ToLocal(e.StartsAt, timeZoneId),
-        e.Capacity, e.Capacity - e.Reserved);
+        e.Capacity, e.Capacity - e.Reserved, e.Price, "EUR");
 }

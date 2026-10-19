@@ -8,7 +8,8 @@ public sealed record CreateEventRequest(
     [Required, StringLength(120, MinimumLength = 2)] string Venue,
     [Required] DateTimeOffset? StartsAt,
     [Range(1, 100_000)] int Capacity,
-    [Required, StringLength(3, MinimumLength = 3)] string AirportCode);
+    [Required, StringLength(3, MinimumLength = 3)] string AirportCode,
+    [Range(typeof(decimal), "0.01", "10000")] decimal Price);
 
 /// <param name="StartsAt">Na hora local da cidade do evento (como nos voos).</param>
 public sealed record EventResponse(
@@ -19,4 +20,6 @@ public sealed record EventResponse(
     string City,
     DateTimeOffset StartsAt,
     int Capacity,
-    int Available);
+    int Available,
+    decimal Price,
+    string Currency);
