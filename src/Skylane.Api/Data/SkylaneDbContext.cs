@@ -35,8 +35,12 @@ public sealed class SkylaneDbContext(DbContextOptions<SkylaneDbContext> options)
 
             e.Property(x => x.Name).HasMaxLength(120);
             e.Property(x => x.Venue).HasMaxLength(120);
+            e.Property(x => x.AirportCode).HasMaxLength(3);
             e.Ignore(x => x.Available);
-            e.HasIndex(x => x.StartsAt);
+            e.HasOne(x => x.Airport).WithMany().HasForeignKey(x => x.AirportCode).OnDelete(DeleteBehavior.Restrict);
+
+            // "Eventos em Amesterdão entre estas datas": o índice segue essa ordem.
+            e.HasIndex(x => new { x.AirportCode, x.StartsAt });
         });
 
         modelBuilder.Entity<Reservation>(r =>

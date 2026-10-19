@@ -19,7 +19,8 @@ public static class ApiClientExtensions
             $"Evento de teste {Guid.NewGuid():N}",
             "Sala de testes",
             DateTimeOffset.UtcNow.AddDays(7),
-            capacity);
+            capacity,
+            "OPO");
 
         var response = await client.PostAsJsonAsync("/api/events", request, Json);
         response.EnsureSuccessStatusCode();

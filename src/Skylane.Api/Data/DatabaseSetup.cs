@@ -27,27 +27,6 @@ public static class DatabaseSetup
         }
 
         await FlightSeeder.SeedAsync(db, time);
-
-        if (!await db.Events.AnyAsync())
-        {
-            var today = time.GetUtcNow().Date;
-
-            db.Events.AddRange(
-                NewEvent("Noite de Fado no Cais", "Armazém do Rio, Porto", today.AddDays(9).AddHours(21), 120),
-                NewEvent("Festival de Jazz da Ribeira", "Jardim do Morro, Gaia", today.AddDays(23).AddHours(18), 800),
-                NewEvent("Stand-up: Sessão Esgotável", "Sala Pequena, Porto", today.AddDays(4).AddHours(22), 8),
-                NewEvent("Concerto de Ano Novo", "Auditório Central, Porto", today.AddDays(80).AddHours(17), 450));
-
-            await db.SaveChangesAsync();
-        }
+        await EventCatalog.SeedAsync(db, time);
     }
-
-    private static Event NewEvent(string name, string venue, DateTime startsAtUtc, int capacity) => new()
-    {
-        Id = Guid.CreateVersion7(),
-        Name = name,
-        Venue = venue,
-        StartsAt = new DateTimeOffset(startsAtUtc, TimeSpan.Zero),
-        Capacity = capacity
-    };
 }
