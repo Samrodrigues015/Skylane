@@ -1,0 +1,26 @@
+# Publicação do front-end React no Netlify.
+# A API (ASP.NET Core + SQL Server) não corre no Netlify: tem de estar publicada noutro serviço.
+
+[build]
+  base = "src/Skylane.Web"
+  # No projeto, o build vai para o wwwroot da API; no Netlify vai para "dist".
+  command = "npm run build -- --outDir dist"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Quando a API estiver publicada, descomentar e trocar o endereço:
+# os pedidos /api/... passam pelo Netlify e seguem para a API (sem problemas de CORS).
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://ENDERECO-DA-API/api/:splat"
+#   status = 200
+#   force = true
+
+# Single-page app: qualquer outra rota (ex.: /flights, /events) devolve o index.html
+# e o React Router trata dela no browser.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
