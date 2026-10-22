@@ -8,6 +8,10 @@ O foco do projeto é um problema concreto: **não vender mais bilhetes do que ex
 - **Eventos**: lotação sem lugares marcados (um contador por evento).
 - **Voos**: lugares marcados num mapa do avião, reservas de ida e volta e horas locais de cada aeroporto.
 
+**[▶ Ver a demo ao vivo](https://skylane.blueisland-b99c3c8d.switzerlandnorth.azurecontainerapps.io)** · cartão de teste `4242 4242 4242 4242`
+
+> A demo corre no escalão gratuito do Azure e desliga-se quando ninguém a usa: a primeira visita pode demorar até um minuto a arrancar.
+
 ![Página inicial](docs/home.png)
 
 | Resultados da pesquisa | Escolha de lugares | Cartões de embarque |
@@ -211,6 +215,16 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 
 > Se já tinhas a base de dados de uma versão anterior, apaga-a com `docker compose down` antes de arrancar: o `EnsureCreated` só cria tabelas numa base de dados nova.
 
+## Publicação
+
+A demo está no **Azure**, a custo zero:
+
+- **Azure Container Apps** corre a imagem Docker (API + site React). Escala para zero quando não há visitas e arranca sozinha no pedido seguinte.
+- **Azure SQL Database** com a oferta gratuita (serverless): entra em pausa quando não é usada e nunca passa do limite gratuito.
+- **GitHub Actions** compila, corre os testes e publica a imagem no GitHub Container Registry (`ghcr.io/samrodrigues015/skylane`) em cada push para `main`.
+
+Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 s) em vez de falhar, e o site mostra "A acordar o servidor…" enquanto isso.
+
 ## Endpoints
 
 | Método | Rota | Descrição |
@@ -255,7 +269,6 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 - Teste de carga com k6
 - Rate limiting nos endpoints de reserva
 - Migrations do EF Core
-- Deploy com demo pública
 
 ## Stack
 
