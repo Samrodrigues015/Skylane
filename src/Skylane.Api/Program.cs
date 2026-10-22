@@ -57,6 +57,11 @@ app.UseStatusCodePages();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// UseRouting explícito DEPOIS dos ficheiros estáticos. Sem isto, o .NET põe o routing no início
+// do pipeline: o fallback do React (index.html) é escolhido para /assets/app.js antes de o
+// UseStaticFiles ter oportunidade de servir o ficheiro, e o browser recebe HTML em vez de JavaScript.
+app.UseRouting();
+
 app.MapOpenApi();
 app.MapScalarApiReference();
 app.MapControllers();
