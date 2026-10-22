@@ -127,7 +127,7 @@ O percurso de compra segue o de um site de viagens a sério:
 2. **Resultados** com uma faixa de datas e o preço mais baixo de cada dia, filtros por hora, companhia e preço, e ordenação.
 3. **Passageiros**, com validação.
 4. **Lugares** num mapa do avião desenhado a partir da API. Ao continuar, os lugares ficam presos durante 15 minutos. Se alguém ficar com um deles entretanto, o mapa é recarregado e o erro é explicado.
-5. **Pagamento** com contagem decrescente e cartões de teste.
+5. **Pagamento** com contagem decrescente e um cartão de teste.
 6. **Cartões de embarque** com QR code, prontos a imprimir.
 
 Em todo o percurso (página inicial, resultados e confirmação) aparecem os **eventos da cidade de destino durante as datas da viagem**. Cada evento pertence ao aeroporto da sua cidade, por isso a ligação entre voos e eventos é só um filtro por `AirportCode` e datas. Se não houver nada nessas datas, mostra os próximos eventos da cidade.
@@ -136,19 +136,13 @@ Algumas decisões:
 
 - **Eventos com descrição em PT e EN.** A API devolve a descrição no idioma do `Accept-Language`, que o front-end envia com o idioma escolhido. A explicação de cada tipo de evento (o que é o fado, o flamenco...) fica no front-end, junto das outras traduções.
 - **Horas locais tratadas como texto.** A API devolve `2026-11-20T10:00:00+00:00` na hora do aeroporto. Passar isto por `new Date()` mostraria a hora no fuso de quem está a ver, por isso as horas são lidas diretamente da string.
-- **Erros traduzidos pelo `code`** do ProblemDetails (`seat_unavailable`, `card_declined`...), em vez de mostrar a mensagem da API.
+- **Erros traduzidos pelo `code`** do ProblemDetails (`seat_unavailable`, `booking_expired`...), em vez de mostrar a mensagem da API.
 - **Estado da compra em `sessionStorage`**, para um refresh a meio não perder o que já foi escolhido.
 - **TanStack Query** para os pedidos à API, **react-i18next** para PT/EN e **CSS Modules** com variáveis de design, sem biblioteca de componentes.
 
 ### Pagamento fictício
 
-O pagamento passa por uma interface `IPaymentGateway`. A implementação `FakePaymentGateway` valida o número com o algoritmo de Luhn e reage aos cartões de teste no estilo da Stripe:
-
-| Cartão | Resultado |
-|---|---|
-| `4242 4242 4242 4242` | Aprovado |
-| `4000 0000 0000 0002` | Recusado |
-| `4000 0000 0000 9995` | Sem saldo |
+O pagamento passa por uma interface `IPaymentGateway`. A implementação `FakePaymentGateway` valida o número com o algoritmo de Luhn e aprova o cartão de teste `4242 4242 4242 4242` (com qualquer data futura e qualquer CVC).
 
 Só se guardam os últimos 4 dígitos. Pagar uma reserva já confirmada devolve a mesma reserva, sem cobrar outra vez. Se o pagamento for aprovado mas a reserva já não puder ser confirmada, o pagamento fica marcado como reembolsado.
 
