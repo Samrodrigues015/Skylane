@@ -138,15 +138,28 @@
   flex-wrap: wrap;
 }
 
+/* Em ecrãs pequenos o menu passa para uma segunda linha, em vez de esconder as opções. */
 @media (max-width: 760px) {
   .topInner {
-    gap: 12px;
+    flex-wrap: wrap;
+    height: auto;
+    padding-block: 10px 8px;
+    gap: 8px 12px;
   }
 
-  .nav a:not([aria-current="page"]) {
-    display: none;
+  .nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    margin-inline: -6px;
   }
 
+  .nav a {
+    padding: 6px 12px;
+    white-space: nowrap;
+  }
+
+  /* O botão "Gerir reserva" repetia o "As minhas reservas" do menu. */
   .manage {
     display: none;
   }
