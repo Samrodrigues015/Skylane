@@ -282,4 +282,4 @@ Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 
 
 ## Autora
 
-Samara Rodrigues, programadora .NET no Porto. Mais projetos no meu [portfólio](https://samrodrigues015.netlify.app).
+Samara Rodrigues, programadora .NET. Mais projetos no meu [portfólio](https://samrodrigues015.netlify.app).
