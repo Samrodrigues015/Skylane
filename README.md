@@ -89,15 +89,23 @@ Uma reserva pode prender vários lugares em dois voos (ida e volta), por isso tu
 erDiagram
     Airports ||--o{ Flights : "origem"
     Airports ||--o{ Flights : "destino"
+    Airports ||--o{ Events : "cidade"
     Airlines ||--o{ Flights : opera
     Flights ||--|{ FlightFares : "preço por classe"
     Flights ||--|{ FlightSeats : "1 linha por lugar"
-    Bookings ||--|{ Passengers : tem
+    Bookings ||--o{ Passengers : tem
     Bookings |o--o{ FlightSeats : prende
     Passengers |o--o{ FlightSeats : "senta-se em"
-    Bookings }o--|| Flights : "ida"
+    Bookings }o--o| Flights : "ida"
     Bookings }o--o| Flights : "volta"
+    Events ||--o{ Reservations : "bilhetes"
+    Bookings |o--o{ Reservations : "eventos no carrinho"
+    Reservations ||--o{ Tickets : emite
+    Bookings |o--o{ Payments : "pago por"
+    Reservations |o--o{ Payments : "pago por"
 ```
+
+Uma `Booking` é o carrinho: pode ter voos, bilhetes para eventos (`Reservations`) ou os dois, e é paga de uma vez.
 
 Decisões que vale a pena destacar:
 
@@ -178,7 +186,7 @@ Para testar a expiração sem esperar 10 minutos, a aplicação usa a abstraçã
 dotnet test        # precisa do Docker a correr
 ```
 
-O GitHub Actions corre, em cada push, o build e os testes da API, a verificação de tipos e o build do front-end e o build da imagem Docker.
+O GitHub Actions corre, em cada push, o build e os testes da API, a verificação de tipos e o build do front-end, e constrói a imagem Docker. Nos pushes para `main` publica a imagem e atualiza a demo no Azure.
 
 ## Como correr
 
@@ -220,8 +228,8 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 A demo está no **Azure**, a custo zero:
 
 - **Azure Container Apps** corre a imagem Docker (API + site React). Escala para zero quando não há visitas e arranca sozinha no pedido seguinte.
-- **Azure SQL Database** com a oferta gratuita (serverless): entra em pausa quando não é usada e nunca passa do limite gratuito.
-- **GitHub Actions** compila, corre os testes e publica a imagem no GitHub Container Registry (`ghcr.io/samrodrigues015/skylane`) em cada push para `main`.
+- **Azure SQL Database** com a oferta gratuita (serverless): entra em pausa quando não é usada e, se chegar ao limite gratuito do mês, fica em pausa até ao mês seguinte em vez de cobrar.
+- **GitHub Actions** compila, corre os testes, publica a imagem no GitHub Container Registry (`ghcr.io/samrodrigues015/skylane`) e atualiza o Container App em cada push para `main`. A autenticação no Azure é feita por OpenID Connect, sem nenhuma password guardada no GitHub.
 
 Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 s) em vez de falhar, e o site mostra "A acordar o servidor…" enquanto isso.
 
@@ -276,4 +284,8 @@ Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 
 
 **Front-end:** React 19, TypeScript, Vite, TanStack Query, React Router, react-i18next, CSS Modules. Fotografias dos eventos do [Unsplash](https://unsplash.com) (licença Unsplash).
 
-**Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions.
+**Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions, Azure Container Apps, Azure SQL Database.
+
+## Autora
+
+Samara Rodrigues, programadora .NET no Porto. Mais projetos no meu [portfólio](https://samrodrigues015.netlify.app).
