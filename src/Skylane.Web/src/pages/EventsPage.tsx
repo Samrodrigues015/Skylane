@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import type { EventCategory, EventResponse } from "../api/types";
 import EventImage from "../components/EventImage";
-import { AlertIcon, ArrowRightIcon, CartIcon, CheckIcon, MinusIcon, PlusIcon } from "../components/Icons";
+import { AlertIcon, ArrowRightIcon, CartIcon, CheckIcon, ChevronDownIcon, MinusIcon, PinIcon, PlusIcon } from "../components/Icons";
 import { MAX_TICKETS, useCart } from "../lib/cart";
+import { CATEGORY_COLORS } from "../lib/eventImages";
 import { errorMessage } from "../lib/errors";
 import { addDays, clockTime, dayNumber, isoDate, longDate, money, monthShort, todayIso } from "../lib/format";
 import styles from "./EventsPage.module.css";
@@ -59,15 +60,26 @@ export default function EventsPage() {
   };
   const hasFilters = Boolean(city || category || period);
 
+  // Num ecrã estreito os chips fazem scroll: mostra o tipo escolhido (ex.: vindo de um link com ?category=Fado).
+  const chipsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = chipsRef.current;
+    const chip = row?.querySelector<HTMLElement>('[aria-checked="true"]');
+    if (!row || !chip) return;
+    const left = chip.offsetLeft - row.offsetLeft;
+    // Só mexe se o chip estiver escondido: no computador cabem quase todos e "Todos" fica à vista.
+    if (left + chip.offsetWidth > row.scrollLeft + row.clientWidth - 48) row.scrollLeft = left - 16;
+  }, [category]);
+
   return (
     <main className="wrap page">
       <h1 className="page-title">{t("events.title")}</h1>
       <p className="page-lead">{t("events.lead")}</p>
 
-      <div className={styles.filters}>
-        <label className={styles.filter}>
-          <small>{t("events.filterCity")}</small>
-          <select value={city ?? ""} onChange={(e) => setFilter("city", e.target.value)}>
+      <div className={styles.toolbar}>
+        <label className={`${styles.cityPick} ${city ? styles.on : ""}`}>
+          <PinIcon />
+          <select aria-label={t("events.filterCity")} value={city ?? ""} onChange={(e) => setFilter("city", e.target.value)}>
             <option value="">{t("events.allCities")}</option>
             {[...(airports.data ?? [])]
               .sort((a, b) => a.city.localeCompare(b.city))
@@ -77,36 +89,44 @@ export default function EventsPage() {
                 </option>
               ))}
           </select>
+          <ChevronDownIcon />
         </label>
-        <label className={styles.filter}>
-          <small>{t("events.filterCategory")}</small>
-          <select value={category ?? ""} onChange={(e) => setFilter("category", e.target.value)}>
-            <option value="">{t("events.allCategories")}</option>
-            {CATEGORIES.map((c) => ({ c, name: t(`eventCategory.${c}.name`) }))
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map(({ c, name }) => (
-                <option key={c} value={c}>
-                  {name}
-                </option>
-              ))}
-          </select>
-        </label>
-        <label className={styles.filter}>
-          <small>{t("events.filterWhen")}</small>
-          <select value={period ?? ""} onChange={(e) => setFilter("when", e.target.value)}>
-            <option value="">{t("events.anyDate")}</option>
-            {(Object.keys(PERIODS) as Period[]).map((p) => (
-              <option key={p} value={p}>
-                {t(`events.period.${p}`)}
-              </option>
-            ))}
-          </select>
-        </label>
+
+        <div className={styles.segmented} role="radiogroup" aria-label={t("events.filterWhen")}>
+          {(["", ...Object.keys(PERIODS)] as ("" | Period)[]).map((p) => (
+            <button
+              key={p || "any"}
+              type="button"
+              role="radio"
+              aria-checked={(period ?? "") === p}
+              onClick={() => setFilter("when", p)}
+            >
+              {p ? t(`events.period.${p}`) : t("events.anyDate")}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div ref={chipsRef} className={styles.chips} role="radiogroup" aria-label={t("events.filterCategory")}>
+        <button type="button" role="radio" aria-checked={!category} onClick={() => setFilter("category", "")}>
+          {t("events.allCategories")}
+        </button>
+        {CATEGORIES.map((c) => ({ c, name: t(`eventCategory.${c}.name`) }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map(({ c, name }) => (
+            <button key={c} type="button" role="radio" aria-checked={category === c} onClick={() => setFilter("category", c)}>
+              <i style={{ background: CATEGORY_COLORS[c] }} />
+              {name}
+            </button>
+          ))}
       </div>
 
       {events.data && (
         <div className={styles.resultsBar}>
-          <span>{t("events.results", { count: events.data.length })}</span>
+          <span>
+            <b>{t("events.results", { count: events.data.length })}</b>
+            {city && ` · ${airports.data?.find((a) => a.code === city)?.city ?? city}`}
+          </span>
           {hasFilters && (
             <button type="button" onClick={() => setParams({}, { replace: true })}>
               {t("events.clearFilters")}

@@ -1,67 +1,140 @@
-/* Barra de filtros com o mesmo aspeto da pesquisa de voos: campos lado a lado numa só caixa. */
-.filters {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--surface);
-  border: 1px solid var(--line-2);
-  border-radius: var(--radius);
-  box-shadow: 0 1px 2px rgba(11, 22, 40, 0.05);
+/* Filtros: cidade e datas numa linha, tipos de evento em chips por baixo. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 14px;
 }
 
-.filter {
+.cityPick {
   position: relative;
   display: flex;
-  flex-direction: column;
-  padding: 10px 16px;
-  border-right: 1px solid var(--line);
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--ink);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.filter:last-child {
-  border-right: 0;
+.cityPick:hover {
+  border-color: var(--ink-2);
 }
 
-.filter:hover {
-  background: #fafbfc;
+.cityPick:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(31, 91, 209, 0.15);
 }
 
-.filter:focus-within {
-  box-shadow: inset 0 0 0 2px var(--blue);
-  border-radius: var(--radius);
+.cityPick.on {
+  border-color: var(--navy-800);
+  box-shadow: inset 0 0 0 1px var(--navy-800);
 }
 
-.filter small {
+.cityPick svg:first-child {
+  color: var(--magenta);
+  flex: none;
+}
+
+.cityPick svg:last-child {
   color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 500;
+  flex: none;
+  pointer-events: none;
 }
 
-.filter select {
+/* O select ocupa o "pill" inteiro, por isso clicar em qualquer lado abre a lista. */
+.cityPick select {
   appearance: none;
   border: 0;
   background: transparent;
-  padding: 2px 22px 2px 0;
   font-weight: 600;
-  font-size: 16px;
-  color: var(--ink);
-  cursor: pointer;
+  font-size: 15px;
+  min-width: 130px;
+  padding: 0;
   outline: none;
+  cursor: pointer;
 }
 
-/* Seta própria, porque a do browser muda de sistema para sistema. */
-.filter::after {
-  content: "";
-  position: absolute;
-  right: 18px;
-  bottom: 18px;
-  width: 7px;
-  height: 7px;
-  border-right: 2px solid var(--muted);
-  border-bottom: 2px solid var(--muted);
-  transform: rotate(45deg);
-  pointer-events: none;
+.segmented {
+  display: flex;
+  background: #e8ebf0;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.segmented button:hover {
+  color: var(--ink);
+}
+
+.segmented button[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(11, 22, 40, 0.14);
+}
+
+.chips {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chips button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-2);
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.chips button:hover {
+  border-color: var(--ink-2);
+}
+
+.chips i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.chips button[aria-checked="true"] {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: #fff;
+}
+
+.chips button[aria-checked="true"] i {
+  display: none;
 }
 
 .resultsBar {
@@ -95,18 +168,39 @@
   color: var(--muted);
 }
 
+.resultsBar b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 @media (max-width: 700px) {
-  .filters {
-    grid-template-columns: 1fr;
+  /* No telemóvel os tipos ficam numa só linha com scroll, em vez de ocuparem meio ecrã. */
+  .chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    margin: 0 -2px 12px;
+    scrollbar-width: none;
+    /* Esbate a ponta direita para se perceber que há mais tipos para o lado. */
+    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
   }
 
-  .filter {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
+  .cityPick {
+    width: 100%;
   }
 
-  .filter:last-child {
-    border-bottom: 0;
+  .cityPick select {
+    flex: 1;
+  }
+
+  .segmented {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .segmented button {
+    flex: 1;
+    padding-inline: 10px;
   }
 }
 

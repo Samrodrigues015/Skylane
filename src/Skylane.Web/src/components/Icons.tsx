@@ -100,3 +100,16 @@ export const TicketIcon = (props: IconProps) => (
     <path d="M14 5v12" strokeDasharray="2 2" />
   </svg>
 );
+
+export const PinIcon = (props: IconProps) => (
+  <svg {...base(props)}>
+    <path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z" />
+    <circle cx="12" cy="9.5" r="2.5" />
+  </svg>
+);
+
+export const ChevronDownIcon = (props: IconProps) => (
+  <svg {...base(props)}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+);
