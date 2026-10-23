@@ -183,6 +183,9 @@ const pt = {
     newSearch: "Pesquisar outro voo",
   },
   manage: {
+    recentTitle: "Reservas neste dispositivo",
+    recentNote: "Guardamos só a referência neste browser, para não teres de a escrever outra vez.",
+    forget: "Esquecer a reserva {{reference}} neste dispositivo",
     title: "As minhas reservas",
     lead: "Consulta uma reserva com a referência de 6 caracteres.",
     reference: "Referência",

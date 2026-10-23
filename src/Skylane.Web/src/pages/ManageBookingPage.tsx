@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { api } from "../api/client";
@@ -7,6 +7,8 @@ import BookingSummary from "../components/BookingSummary";
 import { AlertIcon, ArrowRightIcon, SearchIcon } from "../components/Icons";
 import { errorMessage } from "../lib/errors";
 import { useFlow } from "../lib/flow";
+import { clockTime, isoDate, shortDate } from "../lib/format";
+import { forgetBooking, recentBookings, rememberBooking } from "../lib/recentBookings";
 import { useCountdown } from "../lib/useCountdown";
 import checkout from "./Checkout.module.css";
 import styles from "./ManageBookingPage.module.css";
@@ -18,7 +20,9 @@ export default function ManageBookingPage() {
   const navigate = useNavigate();
   const { update } = useFlow();
   const [params, setParams] = useSearchParams();
-  const reference = params.get("ref") ?? "";
+  const [recent, setRecent] = useState(recentBookings);
+  // Sem referência no link, abre a última reserva deste browser: sair e voltar à página não perde nada.
+  const reference = params.get("ref") ?? recent[0]?.reference ?? "";
   const [input, setInput] = useState(reference);
 
   const query = useQuery({
@@ -28,11 +32,32 @@ export default function ManageBookingPage() {
     retry: false,
   });
   const booking = query.data;
+
+  useEffect(() => {
+    if (!booking) return;
+    rememberBooking(booking);
+    setRecent(recentBookings());
+  }, [booking]);
+
+  const open = (ref: string) => {
+    setInput(ref);
+    setParams({ ref });
+  };
+
+  const forget = (ref: string) => {
+    forgetBooking(ref);
+    const rest = recentBookings();
+    setRecent(rest);
+    if (ref === reference) {
+      setInput("");
+      setParams(rest[0] ? { ref: rest[0].reference } : { ref: "" }, { replace: true });
+    }
+  };
   const countdown = useCountdown(booking?.status === "Pending" ? booking.expiresAt : undefined);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.length === 6) setParams({ ref: input });
+    if (input.length === 6) open(input);
   };
 
   const continuePayment = () => {
@@ -63,6 +88,37 @@ export default function ManageBookingPage() {
           <SearchIcon /> {t("manage.find")}
         </button>
       </form>
+
+      {recent.length > 0 && (
+        <section className={styles.recent}>
+          <h2>{t("manage.recentTitle")}</h2>
+          <ul>
+            {recent.map((r) => (
+              <li key={r.reference} className={r.reference === reference ? styles.current : undefined}>
+                <button type="button" className={styles.recentOpen} onClick={() => open(r.reference)}>
+                  <b>{r.reference}</b>
+                  <span>{r.title}</span>
+                  {r.date && (
+                    <small>
+                      {shortDate(isoDate(r.date))} · {clockTime(r.date)}
+                    </small>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={styles.recentForget}
+                  aria-label={t("manage.forget", { reference: r.reference })}
+                  title={t("manage.forget", { reference: r.reference })}
+                  onClick={() => forget(r.reference)}
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p>{t("manage.recentNote")}</p>
+        </section>
+      )}
 
       {query.isLoading && <p>{t("common.loading")}</p>}
 

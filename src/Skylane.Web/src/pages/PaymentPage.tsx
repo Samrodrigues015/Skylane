@@ -11,6 +11,7 @@ import TripEvents from "../components/TripEvents";
 import { errorMessage } from "../lib/errors";
 import { useFlow } from "../lib/flow";
 import { money } from "../lib/format";
+import { useRememberBooking } from "../lib/recentBookings";
 import { useCountdown } from "../lib/useCountdown";
 import checkout from "./Checkout.module.css";
 import styles from "./PaymentPage.module.css";
@@ -20,6 +21,8 @@ export default function PaymentPage() {
   const navigate = useNavigate();
   const { state, update, reset } = useFlow();
   const booking = state.booking;
+  // A reserva já existe (os lugares estão guardados): fica na lista para a encontrar depois.
+  useRememberBooking(booking);
 
   const countdown = useCountdown(booking?.status === "Pending" ? booking.expiresAt : undefined);
 

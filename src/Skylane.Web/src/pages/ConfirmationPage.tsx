@@ -8,6 +8,7 @@ import DestinationEvents from "../components/DestinationEvents";
 import { AlertIcon, CheckIcon, PrinterIcon } from "../components/Icons";
 import { errorMessage } from "../lib/errors";
 import { useFlow } from "../lib/flow";
+import { useRememberBooking } from "../lib/recentBookings";
 import { addDays, clockTime, isoDate, shortDate } from "../lib/format";
 import { QRCodeSVG } from "qrcode.react";
 import styles from "./ConfirmationPage.module.css";
@@ -24,6 +25,8 @@ export default function ConfirmationPage() {
     queryFn: () => api.getBooking(reference),
     initialData: cached?.status === "Confirmed" ? cached : undefined,
   });
+
+  useRememberBooking(query.data);
 
   // A compra terminou: limpamos o fluxo para a próxima pesquisa começar do zero.
   useEffect(() => {

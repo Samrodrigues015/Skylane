@@ -62,3 +62,106 @@
   font-size: 14px;
   margin: 12px 0 0;
 }
+
+/* Reservas guardadas neste browser (sem login). */
+.recent {
+  max-width: 560px;
+  margin-bottom: 22px;
+}
+
+.recent h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.recent ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.recent li {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+
+.recent li:hover {
+  border-color: var(--line-2);
+}
+
+.recent li.current {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+
+.recentOpen {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  border: 0;
+  background: none;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.recentOpen b {
+  font: 700 19px var(--font-cond);
+  letter-spacing: 0.1em;
+  color: var(--navy-700);
+}
+
+.recentOpen span {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recentOpen small {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.recentForget {
+  border: 0;
+  background: none;
+  width: 40px;
+  align-self: stretch;
+  color: var(--muted);
+  font-size: 20px;
+  border-left: 1px solid var(--line);
+}
+
+.recentForget:hover {
+  color: var(--red);
+}
+
+.recent p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .recentOpen {
+    grid-template-columns: auto 1fr;
+  }
+
+  .recentOpen small {
+    grid-column: 2;
+  }
+}

@@ -185,6 +185,9 @@ const en: Messages = {
     newSearch: "Search another flight",
   },
   manage: {
+    recentTitle: "Bookings on this device",
+    recentNote: "Only the reference is saved in this browser, so you don't have to type it again.",
+    forget: "Forget booking {{reference}} on this device",
     title: "My bookings",
     lead: "Look up a booking with its 6-character reference.",
     reference: "Reference",
