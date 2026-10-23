@@ -30,10 +30,44 @@
   color: var(--muted);
 }
 
-.head a {
-  color: var(--blue);
+/* "Ver todos": botão discreto com contorno, que se enche ao passar o rato. */
+.all {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
   font-weight: 600;
+  font-size: 14px;
   white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.all svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.15s;
+}
+
+.all:hover {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: #fff;
+}
+
+.all:hover svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 640px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .grid {

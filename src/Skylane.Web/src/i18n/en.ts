@@ -246,7 +246,7 @@ const en: Messages = {
     duringLead: "Events on the dates you'll be there.",
     upcoming: "Coming up",
     upcomingLead: "Nothing on your travel dates, but these are next.",
-    all: "See all",
+    all: "See all events in {{city}}",
   },
   tripEvents: {
     added: "Added",

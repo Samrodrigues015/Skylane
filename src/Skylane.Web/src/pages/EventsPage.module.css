@@ -229,16 +229,43 @@
   font-size: 14px;
 }
 
-.resultsBar button {
-  border: 0;
-  background: none;
-  padding: 0;
-  color: var(--blue);
+/* "Limpar filtros": o mesmo estilo de botão com contorno do "Ver todos". */
+.clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px 7px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
   font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.resultsBar button:hover {
-  text-decoration: underline;
+.clear span {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.clear:hover {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: #fff;
+}
+
+.clear:hover span {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
 }
 
 .empty {

@@ -116,8 +116,8 @@ export default function EventsPage() {
             {city && ` · ${airports.data?.find((a) => a.code === city)?.city ?? city}`}
           </span>
           {hasFilters && (
-            <button type="button" onClick={() => setParams({}, { replace: true })}>
-              {t("events.clearFilters")}
+            <button type="button" className={styles.clear} onClick={() => setParams({}, { replace: true })}>
+              <span aria-hidden="true">×</span> {t("events.clearFilters")}
             </button>
           )}
         </div>

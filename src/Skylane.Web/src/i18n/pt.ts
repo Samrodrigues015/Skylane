@@ -244,7 +244,7 @@ const pt = {
     duringLead: "Eventos nas datas em que vais estar lá.",
     upcoming: "Próximos eventos",
     upcomingLead: "Não há eventos nas datas da viagem, mas estes vêm a seguir.",
-    all: "Ver todos",
+    all: "Ver todos os eventos em {{city}}",
   },
   tripEvents: {
     added: "Adicionado",

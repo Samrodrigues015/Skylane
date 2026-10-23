@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { api } from "../api/client";
 import { clockTime, dayNumber, isoDate, money, monthShort, shortDate } from "../lib/format";
 import EventImage from "./EventImage";
+import { ArrowRightIcon } from "./Icons";
 import styles from "./DestinationEvents.module.css";
 
 interface Props {
@@ -46,7 +47,10 @@ export default function DestinationEvents({ city, from, to, exclude = [] }: Prop
           <h2>{query.data!.during ? t("destinationEvents.during") : t("destinationEvents.upcoming")}</h2>
           <p>{query.data!.during ? t("destinationEvents.duringLead") : t("destinationEvents.upcomingLead")}</p>
         </div>
-        <Link to={`/events?city=${city}`}>{t("destinationEvents.all")}</Link>
+        <Link to={`/events?city=${city}`} className={styles.all}>
+          {t("destinationEvents.all", { city: cityName })}
+          <ArrowRightIcon />
+        </Link>
       </div>
 
       <div className={styles.grid}>
