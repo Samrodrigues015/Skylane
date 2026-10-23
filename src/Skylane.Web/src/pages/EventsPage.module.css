@@ -7,18 +7,23 @@
   margin-bottom: 14px;
 }
 
-.cityPick {
+.cityHost {
   position: relative;
+}
+
+.cityPick {
   display: flex;
   align-items: center;
   gap: 8px;
   height: 44px;
+  min-width: 220px;
   padding: 0 14px;
   background: var(--surface);
   border: 1px solid var(--line-2);
   border-radius: 999px;
   color: var(--ink);
-  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -26,7 +31,7 @@
   border-color: var(--ink-2);
 }
 
-.cityPick:focus-within {
+.cityPick[aria-expanded="true"] {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(31, 91, 209, 0.15);
 }
@@ -34,6 +39,11 @@
 .cityPick.on {
   border-color: var(--navy-800);
   box-shadow: inset 0 0 0 1px var(--navy-800);
+}
+
+.cityPick span {
+  flex: 1;
+  text-align: left;
 }
 
 .cityPick svg:first-child {
@@ -44,20 +54,86 @@
 .cityPick svg:last-child {
   color: var(--muted);
   flex: none;
-  pointer-events: none;
+  transition: transform 0.15s;
 }
 
-/* O select ocupa o "pill" inteiro, por isso clicar em qualquer lado abre a lista. */
-.cityPick select {
-  appearance: none;
+.cityPick .flip {
+  transform: rotate(180deg);
+}
+
+.cityMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: 300px;
+  max-height: 360px;
+  overflow: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px -12px rgba(11, 22, 40, 0.35);
+  animation: menuIn 0.12s ease-out;
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.cityMenu button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
   border: 0;
   background: transparent;
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-height: 48px;
+}
+
+.cityMenu button:hover {
+  background: var(--paper);
+}
+
+.cityMenu button[aria-selected="true"] {
+  background: var(--blue-50);
+}
+
+.cityMenu b {
+  display: block;
   font-weight: 600;
-  font-size: 15px;
-  min-width: 130px;
-  padding: 0;
-  outline: none;
-  cursor: pointer;
+  line-height: 1.25;
+}
+
+.cityMenu small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.cityMenu button > svg {
+  color: var(--blue);
+}
+
+.cityCode {
+  font: 700 18px var(--font-cond);
+  color: var(--navy-700);
+  display: flex;
+  align-items: center;
+}
+
+.cityCode svg {
+  color: var(--magenta);
 }
 
 .segmented {
@@ -185,12 +261,10 @@
     mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
   }
 
-  .cityPick {
+  .cityHost,
+  .cityPick,
+  .cityMenu {
     width: 100%;
-  }
-
-  .cityPick select {
-    flex: 1;
   }
 
   .segmented {

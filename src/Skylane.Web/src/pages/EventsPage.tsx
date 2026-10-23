@@ -3,11 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { api } from "../api/client";
-import type { EventCategory, EventResponse } from "../api/types";
+import type { Airport, EventCategory, EventResponse } from "../api/types";
 import EventImage from "../components/EventImage";
 import { AlertIcon, ArrowRightIcon, CartIcon, CheckIcon, ChevronDownIcon, MinusIcon, PinIcon, PlusIcon } from "../components/Icons";
 import { MAX_TICKETS, useCart } from "../lib/cart";
 import { CATEGORY_COLORS } from "../lib/eventImages";
+import { usePopover } from "../lib/usePopover";
 import { errorMessage } from "../lib/errors";
 import { addDays, clockTime, dayNumber, isoDate, longDate, money, monthShort, todayIso } from "../lib/format";
 import styles from "./EventsPage.module.css";
@@ -77,20 +78,7 @@ export default function EventsPage() {
       <p className="page-lead">{t("events.lead")}</p>
 
       <div className={styles.toolbar}>
-        <label className={`${styles.cityPick} ${city ? styles.on : ""}`}>
-          <PinIcon />
-          <select aria-label={t("events.filterCity")} value={city ?? ""} onChange={(e) => setFilter("city", e.target.value)}>
-            <option value="">{t("events.allCities")}</option>
-            {[...(airports.data ?? [])]
-              .sort((a, b) => a.city.localeCompare(b.city))
-              .map((a) => (
-                <option key={a.code} value={a.code}>
-                  {a.city}
-                </option>
-              ))}
-          </select>
-          <ChevronDownIcon />
-        </label>
+        <CityPicker airports={airports.data ?? []} value={city} onChange={(code) => setFilter("city", code)} />
 
         <div className={styles.segmented} role="radiogroup" aria-label={t("events.filterWhen")}>
           {(["", ...Object.keys(PERIODS)] as ("" | Period)[]).map((p) => (
@@ -190,6 +178,70 @@ export default function EventsPage() {
 
       {selected && <EventDialog event={selected} onClose={() => setSelected(null)} />}
     </main>
+  );
+}
+
+/** Escolha da cidade: lista própria em vez do select do browser, com o mesmo aspeto da pesquisa de voos. */
+function CityPicker(props: { airports: Airport[]; value?: string; onChange: (code: string) => void }) {
+  const { t } = useTranslation();
+  const { open, setOpen, ref } = usePopover();
+  const current = props.airports.find((a) => a.code === props.value);
+  const options = [...props.airports].sort((a, b) => a.city.localeCompare(b.city));
+
+  const pick = (code: string) => {
+    props.onChange(code);
+    setOpen(false);
+  };
+
+  // Ao abrir, mostra logo a cidade escolhida (a lista pode ter de fazer scroll).
+  const menuRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const menu = menuRef.current;
+    const selected = menu?.querySelector<HTMLElement>('[aria-selected="true"]');
+    if (menu && selected) menu.scrollTop = selected.offsetTop - menu.clientHeight / 2 + selected.offsetHeight / 2;
+  }, [open]);
+
+  return (
+    <div className={styles.cityHost} ref={ref}>
+      <button
+        type="button"
+        className={`${styles.cityPick} ${props.value ? styles.on : ""}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={t("events.filterCity")}
+        onClick={() => setOpen(!open)}
+      >
+        <PinIcon />
+        <span>{current?.city ?? t("events.allCities")}</span>
+        <ChevronDownIcon className={open ? styles.flip : undefined} />
+      </button>
+
+      {open && (
+        <ul ref={menuRef} role="listbox" className={styles.cityMenu}>
+          <li>
+            <button type="button" role="option" aria-selected={!props.value} onClick={() => pick("")}>
+              <span className={styles.cityCode}>
+                <PinIcon />
+              </span>
+              <b>{t("events.allCities")}</b>
+              {!props.value && <CheckIcon />}
+            </button>
+          </li>
+          {options.map((a) => (
+            <li key={a.code}>
+              <button type="button" role="option" aria-selected={a.code === props.value} onClick={() => pick(a.code)}>
+                <span className={styles.cityCode}>{a.code}</span>
+                <span>
+                  <b>{a.city}</b>
+                  <small>{a.country}</small>
+                </span>
+                {a.code === props.value && <CheckIcon />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

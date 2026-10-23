@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { Airport, CabinClass } from "../api/types";
 import type { SearchParams } from "../lib/flow";
 import { addDays, shortDate, todayIso } from "../lib/format";
+import { usePopover } from "../lib/usePopover";
 import { ArrowRightIcon, CheckIcon, MinusIcon, PlusIcon, SearchIcon } from "./Icons";
 import styles from "./SearchForm.module.css";
 
@@ -121,28 +122,6 @@ export default function SearchForm({ airports, value, onChange, onSubmit }: Prop
       </div>
     </form>
   );
-}
-
-/** Popover que fecha ao clicar fora ou com Escape. */
-function usePopover() {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  return { open, setOpen, ref };
 }
 
 function AirportField(props: {
