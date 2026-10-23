@@ -142,6 +142,20 @@ button {
   background: var(--blue-600);
 }
 
+/* Ação secundária com contorno, que se enche ao passar o rato (como "Ver todos" e "Limpar filtros"). */
+.btn-outline {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.btn-outline:not(:disabled):hover {
+  background: var(--navy-900);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px var(--navy-900);
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--blue);

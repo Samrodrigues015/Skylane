@@ -332,7 +332,7 @@ function EventDialog({ event, onClose }: { event: EventResponse; onClose: () => 
                 <span>{t("cart.addedText", { count: quantity, name: event.name })}</span>
               </div>
               <div className={styles.addedActions}>
-                <button type="button" className="btn btn-ghost" onClick={onClose}>
+                <button type="button" className="btn btn-outline" onClick={onClose}>
                   {t("cart.keepBrowsing")}
                 </button>
                 <button type="button" className="btn btn-primary" onClick={() => navigate("/cart")}>
