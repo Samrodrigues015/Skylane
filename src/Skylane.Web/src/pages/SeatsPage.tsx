@@ -92,14 +92,19 @@ export default function SeatsPage() {
     if (next[active] && nextFree !== -1) setActive(nextFree);
   };
 
+  // Ao mudar de voo, começa sempre no primeiro passageiro ainda sem lugar (ou no primeiro, se já tiverem todos).
+  const switchLeg = (key: LegKey) => {
+    setLeg(key);
+    setActive(Math.max(0, seats[key].findIndex((s) => !s)));
+  };
+
   const complete = (list: string[]) => list.every(Boolean);
   const allDone = complete(seats.outbound) && (!roundTrip || complete(seats.inbound));
 
   const submit = () => {
     if (!allDone) {
       setError(t("seats.missing"));
-      if (!complete(seats.outbound)) setLeg("outbound");
-      else setLeg("inbound");
+      switchLeg(complete(seats.outbound) ? "inbound" : "outbound");
       return;
     }
     setError(null);
@@ -112,10 +117,7 @@ export default function SeatsPage() {
         type="button"
         role="tab"
         aria-selected={leg === key}
-        onClick={() => {
-          setLeg(key);
-          setActive(Math.max(0, seats[key].findIndex((s) => !s)));
-        }}
+        onClick={() => switchLeg(key)}
       >
         {t(key === "outbound" ? "summary.outbound" : "summary.return")}
         <small>

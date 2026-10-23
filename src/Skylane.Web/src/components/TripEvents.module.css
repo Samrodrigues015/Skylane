@@ -119,7 +119,75 @@
   font-size: 12px;
 }
 
+/* Evento já na viagem: fica na lista, marcado a verde, como num carrinho. */
+.row {
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.row.added {
+  border-color: #a8d8bf;
+  background: var(--green-50);
+}
+
+.count {
+  font: 700 16px var(--font-cond);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.addedActions {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 110px;
+}
+
+.addedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  animation: pop 0.25s ease-out;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+}
+
+.addedActions button {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+.addedActions button:hover {
+  color: var(--red);
+}
+
 @media (max-width: 700px) {
+  .count,
+  .addedActions {
+    grid-column: 2;
+  }
+
+  .addedActions {
+    justify-items: start;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 12px;
+  }
+
   .row {
     grid-template-columns: 52px 1fr;
   }

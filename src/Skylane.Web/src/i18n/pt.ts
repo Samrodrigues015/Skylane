@@ -244,6 +244,9 @@ const pt = {
     all: "Ver todos",
   },
   tripEvents: {
+    added: "Adicionado",
+    adding: "A adicionar…",
+    undo: "Retirar",
     title: "Junta à tua viagem",
     lead: "Eventos nas datas em que vais estar lá. Ficam guardados com os teus lugares e pagas tudo de uma vez.",
     each: "{{price}} / bilhete",

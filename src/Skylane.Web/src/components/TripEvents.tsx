@@ -3,22 +3,25 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import EventImage from "./EventImage";
 import { api } from "../api/client";
-import type { BookingResponse, EventResponse } from "../api/types";
+import type { BookedEvent, BookingResponse, EventResponse } from "../api/types";
 import { errorMessage } from "../lib/errors";
 import { addDays, clockTime, dayNumber, isoDate, money, monthShort, shortDate } from "../lib/format";
-import { MinusIcon, PlusIcon } from "./Icons";
+import { CheckIcon, MinusIcon, PlusIcon } from "./Icons";
 import styles from "./TripEvents.module.css";
 
 interface Props {
   booking: BookingResponse;
   onChange: (booking: BookingResponse) => void;
+  /** Tirar um evento já adicionado (o mesmo que o × do resumo). */
+  onRemove: (reservationId: string) => void;
+  removing?: boolean;
 }
 
 /**
  * "Junta à tua viagem": eventos no destino durante a estadia, que se podem acrescentar
  * à reserva antes de pagar. Ficam presos com os lugares do avião e paga-se tudo de uma vez.
  */
-export default function TripEvents({ booking, onChange }: Props) {
+export default function TripEvents({ booking, onChange, onRemove, removing }: Props) {
   const { t } = useTranslation();
 
   const outbound = booking.legs.find((l) => l.direction === "Outbound") ?? booking.legs[0];
@@ -32,10 +35,11 @@ export default function TripEvents({ booking, onChange }: Props) {
     queryFn: () => api.events({ city, from, to, limit: 4 }),
   });
 
-  const added = new Set(booking.events.map((e) => e.eventId));
-  const available = (events.data ?? []).filter((e) => !added.has(e.id) && e.available > 0);
+  // Os eventos adicionados continuam na lista, marcados, como num carrinho normal.
+  const inTrip = new Map(booking.events.map((e) => [e.eventId, e]));
+  const visible = (events.data ?? []).filter((e) => inTrip.has(e.id) || e.available > 0);
 
-  if (available.length === 0) return null;
+  if (visible.length === 0) return null;
 
   return (
     <section className={styles.section}>
@@ -45,13 +49,16 @@ export default function TripEvents({ booking, onChange }: Props) {
         <p>{t("tripEvents.lead")}</p>
       </div>
       <div className={styles.list}>
-        {available.map((ev) => (
+        {visible.map((ev) => (
           <EventRow
             key={ev.id}
             event={ev}
             reference={booking.reference}
             passengers={booking.passengers.length}
+            inTrip={inTrip.get(ev.id)}
             onAdded={onChange}
+            onRemove={onRemove}
+            removing={removing}
           />
         ))}
       </div>
@@ -63,7 +70,10 @@ function EventRow(props: {
   event: EventResponse;
   reference: string;
   passengers: number;
+  inTrip?: BookedEvent;
   onAdded: (booking: BookingResponse) => void;
+  onRemove: (reservationId: string) => void;
+  removing?: boolean;
 }) {
   const { t } = useTranslation();
   const { event } = props;
@@ -76,8 +86,10 @@ function EventRow(props: {
     onSuccess: props.onAdded,
   });
 
+  const { inTrip } = props;
+
   return (
-    <article className={styles.row}>
+    <article className={`${styles.row} ${inTrip ? styles.added : ""}`}>
       <div className={styles.date}>
         <EventImage className={styles.thumb} category={event.category} seed={event.name} width={120} />
         <b>{dayNumber(day)}</b>
@@ -90,22 +102,43 @@ function EventRow(props: {
         </span>
         {add.isError && <span className={styles.error}>{errorMessage(add.error, t)}</span>}
       </div>
-      <div className={styles.stepper}>
-        <button type="button" aria-label="-" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)}>
-          <MinusIcon />
-        </button>
-        <b aria-live="polite">{quantity}</b>
-        <button type="button" aria-label="+" disabled={quantity >= max} onClick={() => setQuantity(quantity + 1)}>
-          <PlusIcon />
-        </button>
-      </div>
-      <div className={styles.price}>
-        <b>{money(event.price * quantity, event.currency)}</b>
-        <small>{t("tripEvents.each", { price: money(event.price, event.currency) })}</small>
-      </div>
-      <button type="button" className="btn btn-blue" disabled={add.isPending} onClick={() => add.mutate()}>
-        {t("tripEvents.add")}
-      </button>
+
+      {inTrip ? (
+        <>
+          <span className={styles.count}>{t("tripEvents.tickets", { count: inTrip.quantity })}</span>
+          <div className={styles.price}>
+            <b>{money(inTrip.total, event.currency)}</b>
+            <small>{t("tripEvents.each", { price: money(inTrip.unitPrice, event.currency) })}</small>
+          </div>
+          <div className={styles.addedActions} aria-live="polite">
+            <span className={styles.addedBadge}>
+              <CheckIcon /> {t("tripEvents.added")}
+            </span>
+            <button type="button" disabled={props.removing} onClick={() => props.onRemove(inTrip.reservationId)}>
+              {t("tripEvents.undo")}
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={styles.stepper}>
+            <button type="button" aria-label="-" disabled={quantity <= 1} onClick={() => setQuantity(quantity - 1)}>
+              <MinusIcon />
+            </button>
+            <b aria-live="polite">{quantity}</b>
+            <button type="button" aria-label="+" disabled={quantity >= max} onClick={() => setQuantity(quantity + 1)}>
+              <PlusIcon />
+            </button>
+          </div>
+          <div className={styles.price}>
+            <b>{money(event.price * quantity, event.currency)}</b>
+            <small>{t("tripEvents.each", { price: money(event.price, event.currency) })}</small>
+          </div>
+          <button type="button" className="btn btn-blue" disabled={add.isPending} onClick={() => add.mutate()}>
+            {add.isPending ? t("tripEvents.adding") : t("tripEvents.add")}
+          </button>
+        </>
+      )}
     </article>
   );
 }

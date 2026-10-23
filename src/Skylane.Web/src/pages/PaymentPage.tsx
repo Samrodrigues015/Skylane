@@ -85,7 +85,14 @@ export default function PaymentPage() {
             </div>
           )}
 
-          {hasFlights && <TripEvents booking={booking} onChange={(updated) => update({ booking: updated })} />}
+          {hasFlights && (
+            <TripEvents
+              booking={booking}
+              onChange={(updated) => update({ booking: updated })}
+              onRemove={(id) => removeEvent.mutate(id)}
+              removing={removeEvent.isPending}
+            />
+          )}
 
           <section className={checkout.card}>
             <div className={checkout.cardHead}>

@@ -246,6 +246,9 @@ const en: Messages = {
     all: "See all",
   },
   tripEvents: {
+    added: "Added",
+    adding: "Adding…",
+    undo: "Remove",
     title: "Add to your trip",
     lead: "Events while you're there. They're held with your seats and you pay for everything at once.",
     each: "{{price}} / ticket",
