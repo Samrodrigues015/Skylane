@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -17,7 +17,12 @@ import PassengersPage from "./pages/PassengersPage";
 import PaymentPage from "./pages/PaymentPage";
 import SeatsPage from "./pages/SeatsPage";
 
-const queryClient = new QueryClient({
+const queryClient: QueryClient = new QueryClient({
+  // Depois de reservar, pagar ou cancelar, os lugares disponíveis mudam:
+  // marca tudo como desatualizado para não se ver um número antigo de lugares.
+  mutationCache: new MutationCache({
+    onSuccess: () => void queryClient.invalidateQueries(),
+  }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

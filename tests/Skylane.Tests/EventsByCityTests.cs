@@ -32,6 +32,28 @@ public sealed class EventsByCityTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Filtra_por_tipo_de_evento()
+    {
+        var start = DateTimeOffset.UtcNow.AddDays(320);
+        var fado = await CreateWithCategoryAsync(EventCategory.Fado, start);
+        var jazz = await CreateWithCategoryAsync(EventCategory.Jazz, start);
+
+        var events = await _client.GetFromJsonAsync<List<EventResponse>>(
+            $"/api/events?city=LIS&category=Fado&from={start.AddDays(-1):yyyy-MM-dd}&to={start.AddDays(1):yyyy-MM-dd}", ApiClientExtensions.Json);
+
+        var ids = events!.Select(e => e.Id).ToList();
+        Assert.Contains(fado.Id, ids);
+        Assert.DoesNotContain(jazz.Id, ids);
+        Assert.All(events!, e => Assert.Equal(EventCategory.Fado, e.Category));
+    }
+
+    private async Task<EventResponse> CreateWithCategoryAsync(EventCategory category, DateTimeOffset startsAt)
+    {
+        var request = new CreateEventRequest($"{category} {Guid.NewGuid():N}", "Sala", startsAt, 10, "LIS", 20m, category);
+        return (await (await _client.PostAsJsonAsync("/api/events", request, ApiClientExtensions.Json)).ReadAsync<EventResponse>())!;
+    }
+
+    [Fact]
     public async Task Hora_do_evento_vem_na_hora_local_da_cidade()
     {
         var day = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(310);

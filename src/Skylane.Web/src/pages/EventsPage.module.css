@@ -1,24 +1,113 @@
-.cities {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 22px;
-}
-
-.cities button {
-  border: 1px solid var(--line-2);
+/* Barra de filtros com o mesmo aspeto da pesquisa de voos: campos lado a lado numa só caixa. */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   background: var(--surface);
-  border-radius: 999px;
-  padding: 7px 14px;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(11, 22, 40, 0.05);
+  margin-bottom: 14px;
 }
 
-.cities button[aria-pressed="true"] {
-  background: var(--navy-800);
-  border-color: var(--navy-800);
-  color: #fff;
+.filter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 16px;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.filter:last-child {
+  border-right: 0;
+}
+
+.filter:hover {
+  background: #fafbfc;
+}
+
+.filter:focus-within {
+  box-shadow: inset 0 0 0 2px var(--blue);
+  border-radius: var(--radius);
+}
+
+.filter small {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.filter select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 2px 22px 2px 0;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+}
+
+/* Seta própria, porque a do browser muda de sistema para sistema. */
+.filter::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.resultsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.resultsBar button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.resultsBar button:hover {
+  text-decoration: underline;
+}
+
+.empty {
+  background: var(--surface);
+  border: 1px dashed var(--line-2);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filter:last-child {
+    border-bottom: 0;
+  }
 }
 
 .grid {

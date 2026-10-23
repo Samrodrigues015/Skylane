@@ -4,6 +4,7 @@ import type {
   CalendarDay,
   CreateBookingRequest,
   DepartureInfo,
+  EventCategory,
   EventResponse,
   FlightSummary,
   CardPayment,
@@ -111,7 +112,7 @@ export const api = {
   payBooking: (reference: string, body: CardPayment) =>
     post<BookingResponse>(`/api/bookings/${encodeURIComponent(reference)}/pay`, body),
 
-  events: (filter: { city?: string; from?: string; to?: string; limit?: number } = {}) => {
+  events: (filter: { city?: string; category?: EventCategory; from?: string; to?: string; limit?: number } = {}) => {
     const q = new URLSearchParams();
     Object.entries(filter).forEach(([key, value]) => value !== undefined && q.set(key, String(value)));
     const query = q.toString();

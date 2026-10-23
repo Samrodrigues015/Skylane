@@ -18,10 +18,11 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
     /// <param name="city">Código do aeroporto da cidade.</param>
     /// <param name="from">Primeiro dia (hora local da cidade).</param>
     /// <param name="to">Último dia, inclusive.</param>
+    /// <param name="category">Tipo de evento (ex.: <c>Fado</c>).</param>
     [HttpGet]
     public async Task<IReadOnlyList<EventResponse>> List(
         [FromQuery] string? city, [FromQuery] DateOnly? from, [FromQuery] DateOnly? to,
-        [FromQuery] int limit = 50, CancellationToken ct = default)
+        [FromQuery] EventCategory? category, [FromQuery] int limit = 50, CancellationToken ct = default)
     {
         var now = time.GetUtcNow();
         var query = db.Events.AsNoTracking().Where(e => e.StartsAt > now);
@@ -33,6 +34,11 @@ public sealed class EventsController(SkylaneDbContext db, ReservationService res
             city = city.Trim().ToUpperInvariant();
             query = query.Where(e => e.AirportCode == city);
             timeZone = await db.Airports.Where(a => a.Code == city).Select(a => a.TimeZoneId).FirstOrDefaultAsync(ct) ?? "UTC";
+        }
+
+        if (category is not null)
+        {
+            query = query.Where(e => e.Category == category);
         }
 
         if (from is not null)
