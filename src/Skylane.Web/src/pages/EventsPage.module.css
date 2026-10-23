@@ -66,11 +66,11 @@
   top: calc(100% + 8px);
   left: 0;
   z-index: 30;
-  /* Duas colunas no computador: as 11 cidades cabem todas, sem barra de scroll. */
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  width: 480px;
+  width: 300px;
+  max-height: 360px;
+  overflow: auto;
+  /* A lista faz scroll, mas sem mostrar a barra. */
+  scrollbar-width: none;
   list-style: none;
   margin: 0;
   padding: 6px;
@@ -88,12 +88,8 @@
   }
 }
 
-/* "Todas as cidades" ocupa a linha inteira. */
-.cityMenu li:first-child {
-  grid-column: 1 / -1;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 4px;
-  margin-bottom: 4px;
+.cityMenu::-webkit-scrollbar {
+  display: none;
 }
 
 .cityMenu button {
@@ -278,9 +274,7 @@
   }
 
   .cityMenu {
-    grid-template-columns: 1fr;
     max-height: 60vh;
-    overflow: auto;
   }
 
   .segmented {
