@@ -23,9 +23,14 @@ public static class DatabaseSetup
         var db = scope.ServiceProvider.GetRequiredService<SkylaneDbContext>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<SkylaneDbContext>>();
 
-        // Na demo publicada a base de dados pode estar em pausa e demorar a acordar:
-        // tentamos durante um minuto, bem abaixo do limite de arranque do IIS.
-        for (var attempt = 1; ; attempt++)
+        // Para o diagnóstico: o servidor e a base de dados (nunca a password) a que a aplicação se vai ligar.
+        var target = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(db.Database.GetConnectionString());
+        logger.LogInformation("Base de dados: servidor {Server}, base de dados {Database}.", target.DataSource, target.InitialCatalog);
+
+        // Na demo publicada a base de dados pode estar em pausa e demorar a acordar. Tentamos durante
+        // 45 segundos no total (contando o tempo de cada ligação), bem abaixo do limite de arranque do IIS.
+        var deadline = DateTime.UtcNow.AddSeconds(45);
+        while (true)
         {
             try
             {
@@ -34,12 +39,13 @@ public static class DatabaseSetup
             }
             catch (Microsoft.Data.SqlClient.SqlException ex)
             {
-                if (attempt >= 20)
+                if (DateTime.UtcNow.AddSeconds(3) >= deadline)
                 {
                     logger.LogError(ex, "A base de dados não respondeu no arranque; vai ser tentado de novo em segundo plano.");
                     return;
                 }
 
+                logger.LogWarning("A base de dados ainda não respondeu ({Message}). A tentar outra vez.", ex.Message);
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
         }
