@@ -4,7 +4,7 @@ using Skylane.Api.Flights;
 namespace Skylane.Api.Data;
 
 /// <summary>
-/// Mantém a demo sempre "viva": uma vez por dia acrescenta os voos das rotas principais
+/// Mantém a demo sempre "viva": no arranque carrega os dados de demonstração e, de 6 em 6 horas, acrescenta os voos das rotas principais
 /// e as sessões dos eventos que entram na janela dos próximos meses.
 ///
 /// Sem isto, uma demo publicada hoje teria daqui a dois meses um quadro de partidas vazio
@@ -46,6 +46,13 @@ public sealed class DemoDataRefresher(
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SkylaneDbContext>();
         var schedule = scope.ServiceProvider.GetRequiredService<FlightSchedule>();
+
+        // Se a base de dados não estava pronta no arranque, as tabelas são criadas aqui.
+        await DatabaseSetup.EnsureCreatedAsync(db, ct);
+
+        // Primeira carga dos voos de uma só vez (muito mais rápido do que voo a voo);
+        // não faz nada se já houver voos.
+        await FlightSeeder.SeedAsync(db, time, ct);
 
         var today = DateOnly.FromDateTime(time.GetUtcNow().UtcDateTime);
         foreach (var (from, to) in FlightTimetable.MainRoutePairs)
