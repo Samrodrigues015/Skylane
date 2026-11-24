@@ -5,11 +5,10 @@ namespace Skylane.Api.Data;
 /// <summary>
 /// Espera que a base de dados esteja disponível antes de atender pedidos à API.
 ///
-/// Na demo publicada, a base de dados é um Azure SQL "serverless" no escalão gratuito: quando
-/// ninguém a usa durante algum tempo entra em pausa, e a primeira ligação a seguir falha enquanto
-/// ela acorda (pode demorar até um minuto). Em vez de devolver erro a essa primeira pessoa,
-/// o pedido espera e vai tentando. Localmente (Docker) a base de dados está sempre ligada
-/// e isto passa sem esperar.
+/// Em alojamentos gratuitos (a demo correu num Azure SQL "serverless" e hoje corre no MonsterASP.NET),
+/// a base de dados pode estar parada quando ninguém usa o site, e a primeira ligação a seguir
+/// falha enquanto ela acorda. Em vez de devolver erro a essa primeira pessoa, o pedido espera
+/// e vai tentando. Localmente (Docker) a base de dados está sempre ligada e isto passa sem esperar.
 /// </summary>
 public sealed class DatabaseWakeUp(RequestDelegate next, IConfiguration configuration, ILogger<DatabaseWakeUp> logger)
 {
