@@ -25,3 +25,8 @@ src/Skylane.Web/dist/
 # O wwwroot da API é gerado pelo build do Skylane.Web (npm run build)
 src/Skylane.Api/wwwroot/
 *.tsbuildinfo
+
+# Perfis de publicação do Visual Studio (têm o utilizador e, no .publishSettings, a password do alojamento)
+**/Properties/PublishProfiles/
+*.publishSettings
+*.pubxml
