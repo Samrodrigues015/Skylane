@@ -8,9 +8,9 @@ O foco do projeto é um problema concreto: **não vender mais bilhetes do que ex
 - **Eventos**: lotação sem lugares marcados (um contador por evento).
 - **Voos**: lugares marcados num mapa do avião, reservas de ida e volta e horas locais de cada aeroporto.
 
-**[▶ Ver a demo ao vivo](https://skylane.blueisland-b99c3c8d.switzerlandnorth.azurecontainerapps.io)** · cartão de teste `4242 4242 4242 4242`
+**[▶ Ver a demo ao vivo](https://skylane.tryasp.net)** · cartão de teste `4242 4242 4242 4242`
 
-> A demo corre no escalão gratuito do Azure e desliga-se quando ninguém a usa: a primeira visita pode demorar até um minuto a arrancar.
+> A demo corre num alojamento gratuito e desliga-se quando ninguém a usa: a primeira visita pode demorar alguns segundos a arrancar.
 
 ![Página inicial](docs/home.png)
 
@@ -186,7 +186,7 @@ Para testar a expiração sem esperar 10 minutos, a aplicação usa a abstraçã
 dotnet test        # precisa do Docker a correr
 ```
 
-O GitHub Actions corre, em cada push, o build e os testes da API, a verificação de tipos e o build do front-end, e constrói a imagem Docker. Nos pushes para `main` publica a imagem e atualiza a demo no Azure.
+O GitHub Actions corre, em cada push, o build e os testes da API, a verificação de tipos e o build do front-end, e constrói a imagem Docker. Nos pushes para `main` publica a imagem no GitHub Container Registry.
 
 ## Como correr
 
@@ -215,7 +215,7 @@ npm run dev
 
 Abre http://localhost:5173. O Vite reencaminha os pedidos `/api` para a API em http://localhost:5080.
 
-A base de dados é criada no arranque e carregada com eventos de exemplo, 11 aeroportos reais, duas companhias fictícias e voos das rotas principais para os próximos 30 dias. O primeiro arranque demora alguns segundos a gerar os lugares.
+A base de dados é criada no arranque, com 11 aeroportos reais e duas companhias fictícias. Logo a seguir, em segundo plano, são carregados os eventos de exemplo e os voos das rotas principais para os próximos 30 dias: o arranque fica rápido (importante no IIS, que só espera 2 minutos) e o quadro de partidas aparece passados alguns segundos.
 
 Qualquer outra combinação de aeroportos e qualquer dia até um ano à frente também tem voos: são criados no momento da primeira pesquisa (ver *Voos criados a pedido* mais acima).
 
@@ -225,13 +225,16 @@ A demo mantém-se sempre atual sozinha: um `BackgroundService` (`DemoDataRefresh
 
 ## Publicação
 
-A demo está no **Azure**, a custo zero:
+A demo está no **[MonsterASP.NET](https://www.monsterasp.net/)**, no plano gratuito, a custo zero e sem cartão de crédito associado:
 
-- **Azure Container Apps** corre a imagem Docker (API + site React). Escala para zero quando não há visitas e arranca sozinha no pedido seguinte.
-- **Azure SQL Database** com a oferta gratuita (serverless): entra em pausa quando não é usada e, se chegar ao limite gratuito do mês, fica em pausa até ao mês seguinte em vez de cobrar.
-- **GitHub Actions** compila, corre os testes, publica a imagem no GitHub Container Registry (`ghcr.io/samrodrigues015/skylane`) e atualiza o Container App em cada push para `main`. A autenticação no Azure é feita por OpenID Connect, sem nenhuma password guardada no GitHub.
+- O site e a API correm em IIS (Windows) com .NET 10, numa base de dados SQL Server do mesmo alojamento.
+- A publicação é feita a partir do Visual Studio (Web Deploy). Um target no `Skylane.Api.csproj` compila o React e inclui-o no que é publicado.
+- A connection string fica só no servidor (`appsettings.Production.json`), nunca no repositório.
+- HTTPS com certificado Let's Encrypt, renovado automaticamente.
 
-Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 s) em vez de falhar, e o site mostra "A acordar o servidor…" enquanto isso.
+O projeto está também preparado para **contentores**. O `Dockerfile` gera uma imagem com a API e o site, publicada pelo CI no GitHub Container Registry (`ghcr.io/samrodrigues015/skylane`). A demo correu antes no **Azure Container Apps** + **Azure SQL** (oferta gratuita), com deploy automático pelo GitHub Actions e autenticação por OpenID Connect, sem passwords guardadas no GitHub. Esse passo continua no workflow e liga-se com a variável `DEPLOY_TO_AZURE=true`.
+
+Como a base de dados pode demorar a responder depois de estar parada, a API espera por ela em vez de falhar, e o site mostra "A acordar o servidor…" enquanto isso.
 
 ## Endpoints
 
@@ -284,7 +287,7 @@ Como a base de dados pode estar em pausa, a API espera que ela acorde (até ~90 
 
 **Front-end:** React 19, TypeScript, Vite, TanStack Query, React Router, react-i18next, CSS Modules. Fotografias dos eventos do [Unsplash](https://unsplash.com) (licença Unsplash).
 
-**Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions, Azure Container Apps, Azure SQL Database.
+**Infraestrutura:** Docker (build em três fases: Node, SDK do .NET e runtime), Docker Compose, GitHub Actions, IIS (MonsterASP.NET); preparado para Azure Container Apps e Azure SQL Database.
 
 ## Autora
 
