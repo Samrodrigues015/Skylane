@@ -19,7 +19,8 @@ RUN dotnet restore src/Skylane.Api/Skylane.Api.csproj
 
 COPY src/Skylane.Api/ src/Skylane.Api/
 COPY --from=web /src/src/Skylane.Api/wwwroot src/Skylane.Api/wwwroot
-RUN dotnet publish src/Skylane.Api/Skylane.Api.csproj -c Release -o /app --no-restore
+# O React já foi compilado na fase 1, por isso o publish não o volta a compilar.
+RUN dotnet publish src/Skylane.Api/Skylane.Api.csproj -c Release -o /app --no-restore -p:BuildWebOnPublish=false
 
 # Fase 3: imagem final, só com o runtime (bem mais pequena que a do SDK)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0

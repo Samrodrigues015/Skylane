@@ -22,4 +22,29 @@
     <MakeDir Directories="$(MSBuildProjectDirectory)/wwwroot" />
   </Target>
 
+  <!--
+    Publicar a partir do Visual Studio (ex.: alojamento em IIS, como o MonsterASP.NET):
+    compila também o React e inclui o wwwroot no que é publicado, para o site ficar completo.
+    O Dockerfile já compila o React à parte, por isso passa -p:BuildWebOnPublish=false.
+  -->
+  <PropertyGroup>
+    <BuildWebOnPublish Condition="'$(BuildWebOnPublish)' == ''">true</BuildWebOnPublish>
+    <WebRoot>$(MSBuildProjectDirectory)/../Skylane.Web</WebRoot>
+  </PropertyGroup>
+
+  <Target Name="PublishWeb" AfterTargets="ComputeFilesToPublish" Condition="'$(BuildWebOnPublish)' == 'true'">
+    <Exec WorkingDirectory="$(WebRoot)" Command="npm ci" />
+    <Exec WorkingDirectory="$(WebRoot)" Command="npm run build" />
+
+    <!-- Os ficheiros do wwwroot só existem depois do build do React, por isso são acrescentados aqui. -->
+    <ItemGroup>
+      <WebFiles Include="wwwroot/**" />
+      <ResolvedFileToPublish Include="@(WebFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(WebFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
 </Project>
